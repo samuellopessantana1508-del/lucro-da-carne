@@ -24,7 +24,7 @@ export const FREE_TRIAL_DAYS = 3;
 
 export const PLAN_DEFAULT_LIMITS: Record<SubscriptionPlan, number> = {
   gratis: 9999,
-  pro: 50,
+  pro: 9999,
   business: 9999,
 };
 
@@ -49,10 +49,10 @@ export const APP_PLANS: AppPlan[] = [
     price: "R$ 49",
     cadence: "/mes por acougue",
     badge: "Mais indicado",
-    lotLimit: `Ate ${PLAN_DEFAULT_LIMITS.pro} lotes`,
+    lotLimit: "Uso ilimitado",
     description: "Para acougues e casas de carne que acompanham fornecedores e margem toda semana.",
     features: [
-      `Ate ${PLAN_DEFAULT_LIMITS.pro} lotes salvos na nuvem`,
+      "Lotes e calculos ilimitados",
       "Dashboard por lote e fornecedor",
       "PDFs para conferencia interna",
       "Acesso liberado por compra Kirvano",
@@ -64,10 +64,10 @@ export const APP_PLANS: AppPlan[] = [
     name: PLAN_LABELS.business,
     price: "R$ 149",
     cadence: "/ano para equipes",
-    lotLimit: "Lotes ilimitados",
+    lotLimit: "Uso ilimitado",
     description: "Para equipes, varios pontos de venda ou operacoes com maior volume de lotes.",
     features: [
-      "Lotes ilimitados na nuvem",
+      "Lotes e calculos ilimitados",
       "Gestao manual pelo painel admin",
       "Acompanhamento de clientes e planos",
       "Preparado para suporte comercial",

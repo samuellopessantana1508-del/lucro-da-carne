@@ -82,8 +82,8 @@ O schema cria:
 Por padrao, novos usuarios entram no plano `gratis` com teste de 3 dias. A conta administradora pode alterar plano, status, validade e limite em `/admin`.
 
 - `gratis`: R$ 0, teste por 3 dias.
-- `pro`: R$ 49/mes, ate 50 lotes.
-- `business`: R$ 149/ano, lotes ilimitados.
+- `pro`: R$ 49/mes, uso ilimitado.
+- `business`: R$ 149/ano, uso ilimitado.
 
 Para liberar o primeiro administrador, cadastre a sua conta e execute uma unica vez no SQL Editor do Supabase:
 
