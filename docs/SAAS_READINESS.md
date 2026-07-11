@@ -2,54 +2,76 @@
 
 ## Prompt operacional executado
 
-> Atue como engenheiro de produto SaaS. Entenda o projeto Lucro da Carne por completo, valide build, dependencias, Git, Supabase, auth, RLS, billing, UX e deploy. Liste o que falta para vender como SaaS e execute melhorias locais de baixo risco que aproximem o produto de lancamento sem exigir credenciais externas.
+> Analise completamente o projeto existente do SaaS Lucro da Carne antes de alterar qualquer arquivo. Depois implemente a integracao de producao entre Lucro da Carne, Perfect Pay e Supabase, com plano gratuito de 3 usos totais, mensal R$ 49,90, anual R$ 149,90, webhook seguro, idempotencia, convites Supabase, RLS, auditoria admin, documentacao e validacao.
 
 ## Estado encontrado
 
-- App Next.js com calculadora, historico, dashboard, detalhe de lote, conta e admin.
+- App Next.js com calculadora, historico, dashboard, detalhe de lote, conta, planos e admin.
 - Modo local via `localStorage` e modo SaaS via Supabase Auth/Postgres.
-- Schema com `profiles`, `lots`, `subscriptions`, eventos de billing, produtos Kirvano e grants pendentes.
-- RLS ativa para isolamento por usuario e leitura/admin de clientes.
-- Edge Function `kirvano-webhook` com token proprio e service key apenas no backend.
-- `npm run lint` e `npm run build` passam.
-- A pasta do projeto agora tem repo Git isolado e remoto GitHub configurado.
-- Existem arquivos grandes locais (`.env.local.zip`, `node_modules.zip`) que nao devem entrar em versionamento ou deploy.
-
-## O que falta para SaaS vendavel
-
-1. Deploy limpo: remover artefatos locais grandes do pacote de deploy e publicar em Vercel/Netlify/Sites.
-2. Ambiente de producao: configurar dominio, HTTPS, variaveis Supabase e links publicos de checkout.
-3. Checkout completo: publicar links Kirvano por plano, testar webhook com compra aprovada, reembolso/chargeback e comprador sem conta.
-4. Conta e suporte: reset de senha, troca de e-mail, cancelamento/gestao de assinatura, canal de suporte e mensagens melhores para limite de plano.
-5. Legal/LGPD: politicas de privacidade, termos, consentimento, exportacao/exclusao de dados e contato do controlador.
-6. Operacao: monitoramento de erros, backups Supabase, alertas de webhook, logs de billing e rotina de auditoria.
-7. Qualidade: testes unitarios dos calculos, testes e2e do fluxo calculadora-login-save e CI no GitHub.
-8. Seguranca: rodar advisors do Supabase no projeto real, revisar permissoes, segredos e expiracao de sessoes antes do lancamento.
+- Schema com `profiles`, `lots`, `subscriptions`, eventos de billing, produtos Kirvano legados e grants pendentes.
+- RLS ativa para isolamento por usuario, admin e tabelas internas de billing.
+- Edge Function Kirvano existente e nova Edge Function Perfect Pay.
+- Repo Git local conectado ao GitHub `samuellopessantana1508-del/lucro-da-carne`.
 
 ## Melhorias executadas neste passe
 
-- Criada a tela `/planos` com planos Gratis, Pro e Business.
-- Precificacao exibida: Gratis R$ 0 por 3 dias, Pro R$ 49/mes ilimitado e Business R$ 149/ano ilimitado.
-- Centralizados dados dos planos em `src/lib/plans.ts`.
-- Adicionado CTA de planos no menu e na pagina de conta.
-- Melhoradas mensagens de erro quando o banco bloqueia salvamento de lotes por permissao, plano ou limite.
-- Adicionadas variaveis de checkout Kirvano ao `.env.local.example`.
-- Ajustado `.gitignore` para versionar `.env.local.example` e ignorar arquivos compactados.
-- Documentado este checklist de prontidao SaaS.
+- Plano gratuito ajustado para 3 usos totais salvos na nuvem.
+- Planos pagos ajustados para Pro R$ 49,90/mes e Business R$ 149,90/ano, ambos com uso ilimitado enquanto ativos.
+- Migration `20260711140000_add_perfectpay_billing_and_free_usage.sql` adicionada com colunas Perfect Pay, ciclo de cobranca, consumo gratis, funcoes privadas e trigger transacional de uso.
+- Edge Function `perfectpay-webhook` adicionada com token seguro, validacao de produto/plano/e-mail, idempotencia, status Perfect Pay e convites Supabase.
+- Conta mostra uso gratis restante, ciclo/validade e acoes de senha/suporte.
+- Admin ganhou busca por e-mail/plano/status/codigo de venda e historico resumido de eventos sem payload bruto.
+- Criada rota `/definir-senha` para convites e reset de senha.
+- `.env.local.example`, README e fixtures de teste Perfect Pay atualizados.
 
-## Checklist de lancamento
+## O que ainda falta para SaaS vendavel
 
-- [x] Criar repo Git limpo dentro de `C:\Users\samue\lucro-da-carne`.
-- [ ] Remover do diretorio de deploy os arquivos `.env.local.zip` e `node_modules.zip`.
-- [ ] Definir `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` de producao.
-- [ ] Definir `NEXT_PUBLIC_KIRVANO_PRO_CHECKOUT_URL` e `NEXT_PUBLIC_KIRVANO_BUSINESS_CHECKOUT_URL`.
-- [ ] Aplicar migrations em um projeto Supabase de producao.
-- [ ] Configurar `KIRVANO_WEBHOOK_TOKEN` e `KIRVANO_APP_URL` nas secrets da Edge Function.
-- [ ] Cadastrar produtos Kirvano em `/admin`.
-- [ ] Confirmar que novos cadastros gratis expiram em 3 dias no Supabase.
-- [ ] Cadastrar o produto Kirvano Pro como `pro`, limite 9999, R$ 49/mes no checkout.
-- [ ] Cadastrar o produto Kirvano Business como `business`, limite 9999, R$ 149/ano no checkout.
-- [ ] Fazer uma compra teste aprovada e validar liberacao do plano.
-- [ ] Testar chargeback/reembolso e expiracao de acesso.
-- [ ] Rodar `npm run lint`, `npm run build` e `npm audit`.
-- [ ] Configurar CI, monitoramento, backups e politicas legais.
+1. Aplicar migrations em um projeto Supabase de producao.
+2. Publicar a Edge Function `perfectpay-webhook` e configurar secrets reais.
+3. Criar produto/planos na Perfect Pay e preencher os codigos reais nas secrets.
+4. Publicar checkout mensal/anual e preencher os links publicos `NEXT_PUBLIC_PERFECTPAY_*`.
+5. Configurar dominio, Site URL e Redirect URLs do Supabase, incluindo `/definir-senha`.
+6. Configurar SMTP do Supabase para convites e reset de senha com remetente do produto.
+7. Testar compra aprovada, duplicada, autorizada, cancelada, reembolsada, chargeback, comprador sem conta e plano desconhecido.
+8. Adicionar termos, privacidade, LGPD, politica de reembolso, suporte e rotina de exclusao/exportacao de dados.
+9. Configurar monitoramento, backups Supabase, alertas de webhook e CI no GitHub.
+
+## Variaveis de producao
+
+```text
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+NEXT_PUBLIC_PERFECTPAY_MONTHLY_CHECKOUT_URL=
+NEXT_PUBLIC_PERFECTPAY_ANNUAL_CHECKOUT_URL=
+PERFECTPAY_MONTHLY_PLAN_CODE=
+PERFECTPAY_ANNUAL_PLAN_CODE=
+PERFECTPAY_PRODUCT_CODE=
+PERFECTPAY_WEBHOOK_TOKEN=
+APP_URL=
+SUPABASE_SERVICE_ROLE_KEY=
+```
+
+## Endpoint Perfect Pay
+
+```text
+https://<project-ref>.supabase.co/functions/v1/perfectpay-webhook
+```
+
+Eventos/status a testar:
+
+- `2` aprovado: libera/renova plano.
+- `6` cancelado: volta para gratis.
+- `7` reembolsado: volta para gratis.
+- `8` autorizado: registra, mas nao libera.
+- `9` chargeback: volta para gratis.
+- `10` completo: registra, mas nao duplica liberacao.
+- Status pendentes/desconhecidos: registra, mas nao libera.
+
+## Validacao local
+
+```bash
+npm run lint
+npm run typecheck
+npm run test:perfectpay
+npm run build
+```

@@ -1,0 +1,23 @@
+{
+  "token": "test-webhook-token",
+  "code": "SALE-INVALID-EMAIL-001",
+  "sale_amount": 49.9,
+  "sale_status_enum": 2,
+  "sale_status_detail": "approved",
+  "date_created": "2026-07-11 10:00:00",
+  "date_approved": "2026-07-11 10:02:00",
+  "product": {
+    "code": "PP-PRODUCT-LUCRO-CARNE",
+    "name": "Lucro da Carne",
+    "external_reference": "PP-PRODUCT-LUCRO-CARNE"
+  },
+  "plan": {
+    "code": "PP-MONTHLY-49-90",
+    "name": "Mensal"
+  },
+  "customer": {
+    "full_name": "Cliente Sem Email",
+    "email": "email-invalido",
+    "identification_number": "00000000000"
+  }
+}

@@ -1,2 +1,5 @@
 [functions.kirvano-webhook]
 verify_jwt = false
+
+[functions.perfectpay-webhook]
+verify_jwt = false

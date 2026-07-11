@@ -18,7 +18,7 @@ O app funciona em dois modos:
 - Dashboard com indicadores e graficos por lote e fornecedor.
 - Detalhe de lote com duplicacao, exclusao, impressao, relatorio copiavel e PDF.
 - Conta com login/cadastro via Supabase, plano, limite e importacao de lotes locais para a nuvem.
-- Pagina de planos com CTA para checkout Kirvano quando os links estiverem configurados.
+- Pagina de planos com CTA para checkout Perfect Pay quando os links estiverem configurados.
 - Painel administrativo protegido por RLS para acompanhar clientes, uso e ajustar planos manualmente.
 - Fallback local quando as variaveis do Supabase nao estao configuradas.
 
@@ -58,8 +58,8 @@ npm.cmd run dev
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=https://seu-projeto.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sua-chave-publica-aqui
-NEXT_PUBLIC_KIRVANO_PRO_CHECKOUT_URL=https://checkout.kirvano.com/seu-produto-pro
-NEXT_PUBLIC_KIRVANO_BUSINESS_CHECKOUT_URL=https://checkout.kirvano.com/seu-produto-business
+NEXT_PUBLIC_PERFECTPAY_MONTHLY_CHECKOUT_URL=https://checkout.perfectpay.com.br/seu-plano-mensal
+NEXT_PUBLIC_PERFECTPAY_ANNUAL_CHECKOUT_URL=https://checkout.perfectpay.com.br/seu-plano-anual
 ```
 
 4. Em Auth > URL Configuration, defina a URL publica do produto como Site URL e inclua os enderecos locais usados no desenvolvimento, como `http://localhost:3000/**`.
@@ -73,17 +73,18 @@ O schema cria:
 - `billing_events` para processar webhooks de pagamento no backend
 - trigger de criacao de perfil/assinatura no cadastro
 - RLS para isolamento por usuario e administradores
-- limite de lotes por plano no banco
+- limite de 3 usos gratis no banco
+- uso ilimitado para assinaturas mensais e anuais ativas
 - grants explicitos para a Data API do Supabase
 - funcoes internas no schema privado, fora da API publica
 
 ## Planos
 
-Por padrao, novos usuarios entram no plano `gratis` com teste de 3 dias. A conta administradora pode alterar plano, status, validade e limite em `/admin`.
+Por padrao, novos usuarios entram no plano `gratis` com 3 usos totais salvos na nuvem. A conta administradora pode alterar plano, status, validade e limite em `/admin`.
 
-- `gratis`: R$ 0, teste por 3 dias.
-- `pro`: R$ 49/mes, uso ilimitado.
-- `business`: R$ 149/ano, uso ilimitado.
+- `gratis`: R$ 0, 3 usos totais.
+- `pro`: R$ 49,90/mes, uso ilimitado enquanto a assinatura mensal estiver ativa.
+- `business`: R$ 149,90/ano, uso ilimitado enquanto a assinatura anual estiver ativa.
 
 Para liberar o primeiro administrador, cadastre a sua conta e execute uma unica vez no SQL Editor do Supabase:
 
@@ -97,7 +98,46 @@ WHERE email = 'seu-email@empresa.com';
 
 O banco armazena provedor, periodo, cancelamento, identificadores externos e eventos de webhook sem expor dados de cobranca ao navegador. A chave `service_role` nunca deve ir para `.env.local` com prefixo `NEXT_PUBLIC_`.
 
-### Kirvano
+### Perfect Pay
+
+O endpoint publicado para a Perfect Pay e:
+
+```text
+https://<project-ref>.supabase.co/functions/v1/perfectpay-webhook
+```
+
+No Dashboard do Supabase, em Edge Functions > Secrets, cadastre:
+
+```text
+PERFECTPAY_MONTHLY_PLAN_CODE=PP-MONTHLY-49-90
+PERFECTPAY_ANNUAL_PLAN_CODE=PP-ANNUAL-149-90
+PERFECTPAY_PRODUCT_CODE=PP-PRODUCT-LUCRO-CARNE
+PERFECTPAY_WEBHOOK_TOKEN=um-token-longo-e-aleatorio
+APP_URL=https://seu-dominio-publico
+SUPABASE_SERVICE_ROLE_KEY=sua-service-role-key
+```
+
+Selecione na Perfect Pay os eventos/status que enviam os campos `token`, `code`, `sale_amount`, `sale_status_enum`, `sale_status_detail`, `date_created`, `date_approved`, `product`, `plan` e `customer`.
+
+Mapeamento usado pelo webhook:
+
+- `sale_status_enum = 2`: compra aprovada, libera ou renova acesso.
+- `sale_status_enum = 6`: cancelada, volta para o plano gratis.
+- `sale_status_enum = 7`: reembolsada, volta para o plano gratis.
+- `sale_status_enum = 8`: autorizada, registra evento sem liberar acesso.
+- `sale_status_enum = 9`: chargeback, volta para o plano gratis.
+- `sale_status_enum = 10`: completa, registra evento sem duplicar liberacao.
+- Outros status: registra evento sem liberar acesso.
+
+O webhook valida token com comparacao segura, normaliza e-mail, valida produto/plano, grava evento idempotente em `billing_events` e usa Supabase Auth para convidar compradores sem conta para `/definir-senha`.
+
+Payloads de validacao ficam em `scripts/perfectpay-payloads/`. Rode:
+
+```bash
+npm run test:perfectpay
+```
+
+### Kirvano legado
 
 O endpoint publicado para a Kirvano e:
 
@@ -116,7 +156,7 @@ Depois, no painel da Kirvano, crie um webhook com esse endpoint, use o mesmo tok
 
 Em `/admin`, cadastre o ID do produto Kirvano e associe-o ao plano, limite de lotes e prazo de acesso. A funcao somente libera acesso para produtos cadastrados. Ela usa o e-mail de `customer.email` enviado pela Kirvano: se o comprador ja tiver conta, o plano e liberado na hora; caso contrario, ele recebe um convite e o acesso pendente e aplicado quando aceitar o cadastro.
 
-Os links `NEXT_PUBLIC_KIRVANO_PRO_CHECKOUT_URL` e `NEXT_PUBLIC_KIRVANO_BUSINESS_CHECKOUT_URL` aparecem na pagina `/planos`. O webhook continua sendo a fonte de verdade para liberar ou revogar acesso.
+Os links `NEXT_PUBLIC_KIRVANO_PRO_CHECKOUT_URL` e `NEXT_PUBLIC_KIRVANO_BUSINESS_CHECKOUT_URL` continuam como fallback legado na pagina `/planos`. Para novas vendas, use os links `NEXT_PUBLIC_PERFECTPAY_MONTHLY_CHECKOUT_URL` e `NEXT_PUBLIC_PERFECTPAY_ANNUAL_CHECKOUT_URL`.
 
 ## Prontidao SaaS
 
@@ -125,14 +165,16 @@ O arquivo [`docs/SAAS_READINESS.md`](docs/SAAS_READINESS.md) lista o prompt oper
 Pontos criticos antes de publicar:
 
 - Remover artefatos locais grandes do pacote de deploy, como `.env.local.zip` e `node_modules.zip`.
-- Configurar dominio, Site URL do Supabase, secrets da Edge Function e produtos Kirvano.
-- Testar compra aprovada, reembolso/chargeback, comprador sem conta e limite de plano.
+- Configurar dominio, Site URL do Supabase, secrets da Edge Function e produto/planos Perfect Pay.
+- Testar Perfect Pay com compra aprovada, duplicidade, status autorizado, reembolso/chargeback, comprador sem conta e limite gratuito de 3 usos.
 
 ## Scripts
 
 ```bash
 npm run dev
 npm run lint
+npm run typecheck
+npm run test:perfectpay
 npm run build
 npm run start
 ```
@@ -160,5 +202,7 @@ Antes de publicar:
 
 ```bash
 npm run lint
+npm run typecheck
+npm run test:perfectpay
 npm run build
 ```

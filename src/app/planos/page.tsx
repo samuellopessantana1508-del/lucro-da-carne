@@ -36,7 +36,7 @@ export default function PlanosPage() {
             </h1>
             <p className="mt-2 max-w-2xl text-sm sm:text-base text-[#8A8178]">
               O produto ja roda em modo local. Com conta ativa, seus lotes ficam na nuvem,
-              respeitam limite de plano e podem ser liberados automaticamente por compras Kirvano.
+              respeitam limite de plano e podem ser liberados automaticamente por compras Perfect Pay.
             </p>
           </div>
 
@@ -66,7 +66,7 @@ export default function PlanosPage() {
           <div className="mb-6">
             <AlertBox
               type="info"
-              message="Configure os links NEXT_PUBLIC_KIRVANO_PRO_CHECKOUT_URL e NEXT_PUBLIC_KIRVANO_BUSINESS_CHECKOUT_URL para ativar os botoes de assinatura."
+              message="Configure os links NEXT_PUBLIC_PERFECTPAY_MONTHLY_CHECKOUT_URL e NEXT_PUBLIC_PERFECTPAY_ANNUAL_CHECKOUT_URL para ativar os botoes de assinatura."
             />
           </div>
         )}
@@ -154,15 +154,15 @@ export default function PlanosPage() {
           <div className="card p-5 sm:p-6">
             <h2 className="text-lg font-bold text-[#4A0F14]">Como a liberacao funciona</h2>
             <p className="mt-2 text-sm text-[#8A8178]">
-              A Kirvano envia o webhook para a Edge Function, o produto comprado e comparado com
-              os planos cadastrados no admin e a assinatura e aplicada pelo e-mail do comprador.
+              A Perfect Pay envia o webhook para a Edge Function, os codigos de produto e plano
+              sao validados e a assinatura e aplicada pelo e-mail do comprador.
             </p>
           </div>
           <div className="card p-5 sm:p-6">
             <h2 className="text-lg font-bold text-[#4A0F14]">Antes de vender</h2>
             <p className="mt-2 text-sm text-[#8A8178]">
-              Publique o app, configure Site URL no Supabase, cadastre os produtos Kirvano no painel
-              admin e teste uma compra aprovada em ambiente controlado.
+              Publique o app, configure Site URL no Supabase, cadastre os codigos Perfect Pay nas
+              secrets da Edge Function e teste uma compra aprovada em ambiente controlado.
             </p>
           </div>
         </section>
@@ -171,4 +171,3 @@ export default function PlanosPage() {
     </>
   );
 }
-

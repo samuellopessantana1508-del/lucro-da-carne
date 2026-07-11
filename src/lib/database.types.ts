@@ -3,9 +3,10 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type UserRole = "user" | "admin";
 export type SubscriptionPlan = "gratis" | "pro" | "business";
 export type SubscriptionStatus = "active" | "past_due" | "canceled" | "expired";
-export type PaymentProvider = "manual" | "stripe" | "mercado_pago" | "kirvano";
+export type PaymentProvider = "manual" | "stripe" | "mercado_pago" | "kirvano" | "perfectpay";
 export type BillingEventProvider = Exclude<PaymentProvider, "manual">;
 export type BillingEventStatus = "received" | "processed" | "failed";
+export type BillingCycle = "free" | "monthly" | "annual";
 
 export interface Database {
   public: {
@@ -100,6 +101,15 @@ export interface Database {
           provider: PaymentProvider;
           provider_customer_id: string | null;
           provider_subscription_id: string | null;
+          sale_code: string | null;
+          product_code: string | null;
+          plan_code: string | null;
+          plan_name: string | null;
+          billing_cycle: BillingCycle | null;
+          amount: number | null;
+          approved_at: string | null;
+          cancelled_at: string | null;
+          free_uses_consumed: number;
           current_period_start: string | null;
           current_period_end: string | null;
           cancel_at_period_end: boolean;
@@ -117,6 +127,15 @@ export interface Database {
           provider?: PaymentProvider;
           provider_customer_id?: string | null;
           provider_subscription_id?: string | null;
+          sale_code?: string | null;
+          product_code?: string | null;
+          plan_code?: string | null;
+          plan_name?: string | null;
+          billing_cycle?: BillingCycle | null;
+          amount?: number | null;
+          approved_at?: string | null;
+          cancelled_at?: string | null;
+          free_uses_consumed?: number;
           current_period_start?: string | null;
           current_period_end?: string | null;
           cancel_at_period_end?: boolean;
@@ -132,6 +151,15 @@ export interface Database {
           provider?: PaymentProvider;
           provider_customer_id?: string | null;
           provider_subscription_id?: string | null;
+          sale_code?: string | null;
+          product_code?: string | null;
+          plan_code?: string | null;
+          plan_name?: string | null;
+          billing_cycle?: BillingCycle | null;
+          amount?: number | null;
+          approved_at?: string | null;
+          cancelled_at?: string | null;
+          free_uses_consumed?: number;
           current_period_start?: string | null;
           current_period_end?: string | null;
           cancel_at_period_end?: boolean;
@@ -180,7 +208,7 @@ export interface Database {
       billing_products: {
         Row: {
           id: string;
-          provider: "kirvano";
+          provider: "kirvano" | "perfectpay";
           provider_product_id: string;
           plan: SubscriptionPlan;
           lots_limit: number;
@@ -191,7 +219,7 @@ export interface Database {
         };
         Insert: {
           id?: string;
-          provider?: "kirvano";
+          provider?: "kirvano" | "perfectpay";
           provider_product_id: string;
           plan: SubscriptionPlan;
           lots_limit?: number;
@@ -201,7 +229,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: {
-          provider?: "kirvano";
+          provider?: "kirvano" | "perfectpay";
           provider_product_id?: string;
           plan?: SubscriptionPlan;
           lots_limit?: number;
@@ -214,7 +242,7 @@ export interface Database {
       billing_access_grants: {
         Row: {
           id: string;
-          provider: "kirvano";
+          provider: "kirvano" | "perfectpay";
           provider_sale_id: string;
           provider_product_id: string;
           email: string;
@@ -230,7 +258,7 @@ export interface Database {
         };
         Insert: {
           id?: string;
-          provider?: "kirvano";
+          provider?: "kirvano" | "perfectpay";
           provider_sale_id: string;
           provider_product_id: string;
           email: string;
@@ -245,6 +273,10 @@ export interface Database {
           updated_at?: string;
         };
         Update: {
+          provider?: "kirvano" | "perfectpay";
+          provider_sale_id?: string;
+          provider_product_id?: string;
+          email?: string;
           user_id?: string | null;
           plan?: SubscriptionPlan;
           lots_limit?: number;

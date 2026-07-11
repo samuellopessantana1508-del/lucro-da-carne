@@ -80,7 +80,7 @@ function mapLotWriteError(error: unknown, fallback: string): Error {
     normalized.includes("violates row-level security")
   ) {
     return new Error(
-      `${fallback} Verifique se sua assinatura esta ativa e se ainda ha limite de lotes no plano.`
+      `${fallback} Verifique se sua assinatura esta ativa ou se ainda ha usos gratis disponiveis.`
     );
   }
 

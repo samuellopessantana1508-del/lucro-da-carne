@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
-import { LockKeyhole, LogIn, RefreshCw, Save, ShieldCheck, Users } from "lucide-react";
+import { LockKeyhole, LogIn, ReceiptText, RefreshCw, Save, Search, ShieldCheck, Users } from "lucide-react";
 import AlertBox from "@/components/AlertBox";
 import AuthModal from "@/components/AuthModal";
 import Header from "@/components/Header";
@@ -15,6 +15,7 @@ import { getSupabaseBrowserClient } from "@/lib/supabase";
 type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
 type SubscriptionRow = Database["public"]["Tables"]["subscriptions"]["Row"];
 type BillingProductRow = Database["public"]["Tables"]["billing_products"]["Row"];
+type BillingEventSummary = Omit<Database["public"]["Tables"]["billing_events"]["Row"], "payload">;
 type Customer = ProfileRow & { subscription: SubscriptionRow | null; lotsCount: number };
 
 const PLANS: SubscriptionPlan[] = ["gratis", "pro", "business"];
@@ -34,6 +35,8 @@ export default function AdminPage() {
   const [authOpen, setAuthOpen] = useState(false);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [billingProducts, setBillingProducts] = useState<BillingProductRow[]>([]);
+  const [billingEvents, setBillingEvents] = useState<BillingEventSummary[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [dataLoading, setDataLoading] = useState(false);
   const [busyUserId, setBusyUserId] = useState<string | null>(null);
   const [productBusy, setProductBusy] = useState(false);
@@ -56,11 +59,17 @@ export default function AdminPage() {
         supabase.from("lots").select("user_id"),
         supabase.from("billing_products").select("*").eq("provider", "kirvano").order("created_at"),
       ]);
+      const billingEventsResult = await supabase
+        .from("billing_events")
+        .select("id,user_id,provider,provider_event_id,event_type,status,error_message,processed_at,created_at")
+        .order("created_at", { ascending: false })
+        .limit(30);
 
       if (profilesResult.error) throw profilesResult.error;
       if (subscriptionsResult.error) throw subscriptionsResult.error;
       if (lotsResult.error) throw lotsResult.error;
       if (productsResult.error) throw productsResult.error;
+      if (billingEventsResult.error) throw billingEventsResult.error;
 
       const subscriptionsByUser = new Map(
         (subscriptionsResult.data ?? []).map((subscription) => [subscription.user_id, subscription])
@@ -79,6 +88,7 @@ export default function AdminPage() {
         }))
       );
       setBillingProducts(productsResult.data ?? []);
+      setBillingEvents((billingEventsResult.data ?? []) as BillingEventSummary[]);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Nao foi possivel carregar os clientes.");
     } finally {
@@ -103,6 +113,34 @@ export default function AdminPage() {
     }),
     [customers]
   );
+  const customersById = useMemo(
+    () => new Map(customers.map((customer) => [customer.id, customer])),
+    [customers]
+  );
+  const filteredCustomers = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) return customers;
+
+    return customers.filter((customer) => {
+      const subscription = customer.subscription;
+      const searchable = [
+        customer.email,
+        customer.name,
+        customer.business_name,
+        subscription?.plan,
+        subscription?.status,
+        subscription?.provider,
+        subscription?.sale_code,
+        subscription?.plan_code,
+        subscription?.provider_subscription_id,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return searchable.includes(term);
+    });
+  }, [customers, searchTerm]);
 
   async function updateSubscription(event: FormEvent<HTMLFormElement>, customer: Customer) {
     event.preventDefault();
@@ -277,8 +315,22 @@ export default function AdminPage() {
               <MetricCard label="Lotes salvos" value={String(metrics.lots)} icon={Save} />
             </div>
 
+            <div className="flex flex-col gap-2 sm:max-w-lg">
+              <label htmlFor="admin-search" className="label">Buscar clientes e vendas</label>
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8A8178]" />
+                <input
+                  id="admin-search"
+                  value={searchTerm}
+                  onChange={(event) => setSearchTerm(event.target.value)}
+                  className="input-field pl-10"
+                  placeholder="E-mail, plano, status ou codigo de venda"
+                />
+              </div>
+            </div>
+
             <div className="card overflow-x-auto">
-              <table className="w-full min-w-[900px] text-left text-sm">
+              <table className="w-full min-w-[1040px] text-left text-sm">
                 <thead className="border-b border-[#E5DED3] bg-[#F7F1E8] text-xs uppercase text-[#8A8178]">
                   <tr>
                     <th className="px-4 py-3 font-semibold">Cliente</th>
@@ -291,7 +343,7 @@ export default function AdminPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {customers.map((customer) => (
+                  {filteredCustomers.map((customer) => (
                     <tr key={customer.id} className="border-b border-[#EDE7DF] last:border-0">
                       <td className="px-4 py-3">
                         <p className="font-semibold text-[#4A0F14]">
@@ -312,6 +364,10 @@ export default function AdminPage() {
                                   <option key={plan} value={plan}>{plan}</option>
                                 ))}
                               </select>
+                              <p className="mt-1 text-[11px] text-[#8A8178]">
+                                {customer.subscription.provider === "perfectpay" ? "Perfect Pay" : customer.subscription.provider}
+                                {customer.subscription.sale_code ? ` · ${customer.subscription.sale_code}` : ""}
+                              </p>
                             </div>
                             <div className="px-4 py-2">
                               <select name="status" defaultValue={customer.subscription.status} className="input-field py-2">
@@ -331,7 +387,10 @@ export default function AdminPage() {
                               />
                             </div>
                             <div className="px-4 py-3 text-xs text-[#8A8178]">
-                              {formatDateBR(customer.created_at.slice(0, 10))}
+                              <p>{formatDateBR(customer.created_at.slice(0, 10))}</p>
+                              {customer.subscription.approved_at && (
+                                <p>Aprovado {formatDateBR(customer.subscription.approved_at.slice(0, 10))}</p>
+                              )}
                             </div>
                             <div className="px-4 py-2">
                               <button
@@ -350,10 +409,10 @@ export default function AdminPage() {
                       </td>
                     </tr>
                   ))}
-                  {!dataLoading && customers.length === 0 && (
+                  {!dataLoading && filteredCustomers.length === 0 && (
                     <tr>
                       <td colSpan={7} className="px-4 py-10 text-center text-sm text-[#8A8178]">
-                        Nenhum cliente cadastrado ainda.
+                        Nenhum cliente encontrado.
                       </td>
                     </tr>
                   )}
@@ -361,6 +420,55 @@ export default function AdminPage() {
               </table>
               {dataLoading && <p className="px-4 py-4 text-sm text-[#8A8178]">Carregando clientes...</p>}
             </div>
+
+            <section className="card overflow-x-auto">
+              <div className="flex items-center gap-2 px-4 py-4">
+                <ReceiptText className="h-5 w-5 text-[#C89B3C]" />
+                <h2 className="text-lg font-bold text-[#4A0F14]">Eventos de pagamento</h2>
+              </div>
+              <table className="w-full min-w-[860px] text-left text-sm">
+                <thead className="border-y border-[#E5DED3] bg-[#F7F1E8] text-xs uppercase text-[#8A8178]">
+                  <tr>
+                    <th className="px-4 py-3 font-semibold">Evento</th>
+                    <th className="px-4 py-3 font-semibold">Cliente</th>
+                    <th className="px-4 py-3 font-semibold">Status</th>
+                    <th className="px-4 py-3 font-semibold">Recebido</th>
+                    <th className="px-4 py-3 font-semibold">Processado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {billingEvents.map((event) => {
+                    const eventCustomer = event.user_id ? customersById.get(event.user_id) : null;
+                    return (
+                      <tr key={event.id} className="border-b border-[#EDE7DF] last:border-0">
+                        <td className="px-4 py-3">
+                          <p className="font-mono text-xs text-[#4A0F14]">{event.provider_event_id}</p>
+                          <p className="text-xs text-[#8A8178]">{event.provider} · {event.event_type}</p>
+                        </td>
+                        <td className="px-4 py-3 text-[#4A0F14]">{eventCustomer?.email ?? "-"}</td>
+                        <td className="px-4 py-3">
+                          <p className="font-semibold text-[#4A0F14]">{event.status}</p>
+                          {event.error_message && <p className="mt-1 text-xs text-[#B23A3A]">{event.error_message}</p>}
+                        </td>
+                        <td className="px-4 py-3 text-xs text-[#8A8178]">
+                          {formatDateBR(event.created_at.slice(0, 10))}
+                        </td>
+                        <td className="px-4 py-3 text-xs text-[#8A8178]">
+                          {event.processed_at ? formatDateBR(event.processed_at.slice(0, 10)) : "-"}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {!dataLoading && billingEvents.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="px-4 py-8 text-center text-sm text-[#8A8178]">
+                        Nenhum evento registrado ainda.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </section>
 
             <section className="card p-5 sm:p-6">
               <div className="mb-5">

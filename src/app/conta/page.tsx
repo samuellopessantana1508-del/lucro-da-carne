@@ -11,7 +11,8 @@ import { useLotsStore } from "@/hooks/useLots";
 import { getLots } from "@/lib/storage";
 import { getSupabaseBrowserClient } from "@/lib/supabase";
 import { formatDateBR } from "@/lib/format";
-import { Cloud, CreditCard, Database, LogIn, Save, Upload, User, WifiOff } from "lucide-react";
+import { FREE_USAGE_LIMIT } from "@/lib/plans";
+import { Cloud, CreditCard, Database, KeyRound, LifeBuoy, LogIn, Save, Upload, User, WifiOff } from "lucide-react";
 
 export default function ContaPage() {
   const {
@@ -36,11 +37,26 @@ export default function ContaPage() {
   }, [loaded, loadedFor, loadLots, userId]);
 
   const lotLimit = subscription?.lots_limit ?? 0;
+  const freeUsesConsumed = subscription?.free_uses_consumed ?? Math.min(lots.length, FREE_USAGE_LIMIT);
+  const freeUsesRemaining = Math.max(0, FREE_USAGE_LIMIT - freeUsesConsumed);
+  const usageLabel =
+    subscription?.plan === "gratis"
+      ? `${freeUsesRemaining} de ${FREE_USAGE_LIMIT} restantes`
+      : "Ilimitado";
   const validityLabel = useMemo(() => {
     if (!subscription) return "-";
     if (subscription.expires_at) return formatDateBR(subscription.expires_at.slice(0, 10));
     return "Sem vencimento";
   }, [subscription]);
+  const periodStartLabel = subscription?.current_period_start
+    ? formatDateBR(subscription.current_period_start.slice(0, 10))
+    : "-";
+  const providerLabel =
+    subscription?.provider === "perfectpay"
+      ? "Perfect Pay"
+      : subscription?.provider === "kirvano"
+        ? "Kirvano"
+        : "Manual";
 
   async function saveProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -94,6 +110,29 @@ export default function ContaPage() {
       );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Nao foi possivel importar os lotes.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function sendPasswordReset() {
+    if (!user?.email) return;
+
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase) return;
+
+    setBusy(true);
+    setError(null);
+    setMessage(null);
+
+    try {
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(user.email, {
+        redirectTo: `${window.location.origin}/definir-senha`,
+      });
+      if (resetError) throw resetError;
+      setMessage("Enviamos um link de redefinicao de senha para seu e-mail.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Nao foi possivel enviar o reset de senha.");
     } finally {
       setBusy(false);
     }
@@ -154,11 +193,7 @@ export default function ContaPage() {
               <MetricCard label="Plano" value={subscription?.plan ?? "gratis"} icon={Cloud} />
               <MetricCard label="Validade" value={validityLabel} icon={Save} />
               <MetricCard label="Lotes na conta" value={String(lots.length)} icon={Database} />
-              <MetricCard
-                label="Limite de lotes"
-                value={lotLimit >= 9999 ? "Ilimitado" : String(lotLimit || "-")}
-                icon={Upload}
-              />
+              <MetricCard label="Uso do plano" value={usageLabel} icon={Upload} />
             </div>
 
             <div className="card p-5 sm:p-6">
@@ -166,10 +201,24 @@ export default function ContaPage() {
                 <div>
                   <h2 className="text-lg font-bold text-[#4A0F14]">Plano e assinatura</h2>
                   <p className="mt-1 text-sm text-[#8A8178]">
-                    {subscription?.provider === "kirvano"
-                      ? "Sua assinatura foi liberada por uma compra Kirvano."
+                    {subscription?.provider === "perfectpay" || subscription?.provider === "kirvano"
+                      ? `Sua assinatura foi liberada por uma compra ${providerLabel}.`
                       : "Veja os planos para liberar mais lotes e manter o historico na nuvem."}
                   </p>
+                  <div className="mt-4 grid gap-3 text-sm text-[#4A0F14] sm:grid-cols-3">
+                    <p>
+                      <span className="block text-xs font-semibold uppercase text-[#8A8178]">Inicio</span>
+                      {periodStartLabel}
+                    </p>
+                    <p>
+                      <span className="block text-xs font-semibold uppercase text-[#8A8178]">Proxima renovacao</span>
+                      {validityLabel}
+                    </p>
+                    <p>
+                      <span className="block text-xs font-semibold uppercase text-[#8A8178]">Limite</span>
+                      {lotLimit >= 9999 ? "Uso ilimitado" : `${FREE_USAGE_LIMIT} usos totais`}
+                    </p>
+                  </div>
                 </div>
                 <Link href="/planos" className="btn-secondary justify-center">
                   <CreditCard className="w-4 h-4" />
@@ -217,6 +266,28 @@ export default function ContaPage() {
                 </button>
               </div>
             </form>
+
+            <div className="card p-5 sm:p-6">
+              <h2 className="text-lg font-bold text-[#4A0F14] mb-4">Acesso e suporte</h2>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={() => void sendPasswordReset()}
+                  disabled={busy}
+                  className="btn-secondary justify-center disabled:opacity-50"
+                >
+                  <KeyRound className="w-4 h-4" />
+                  Redefinir senha
+                </button>
+                <a href="mailto:suporte@lucrodacarne.com" className="btn-secondary justify-center">
+                  <LifeBuoy className="w-4 h-4" />
+                  Suporte
+                </a>
+              </div>
+              <p className="mt-3 text-xs text-[#8A8178]">
+                Para trocar o e-mail da conta, acione o suporte para validarmos a titularidade antes da alteracao.
+              </p>
+            </div>
 
             <div className="card p-5 sm:p-6">
               <h2 className="text-lg font-bold text-[#4A0F14] mb-2">Migracao de dados locais</h2>
