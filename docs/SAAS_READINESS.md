@@ -12,12 +12,12 @@
 - RLS ativa para isolamento por usuario e leitura/admin de clientes.
 - Edge Function `kirvano-webhook` com token proprio e service key apenas no backend.
 - `npm run lint` e `npm run build` passam.
-- A pasta do projeto nao e um repo Git isolado; o `.git` atual esta em `C:\Users\samue`.
+- A pasta do projeto agora tem repo Git isolado e remoto GitHub configurado.
 - Existem arquivos grandes locais (`.env.local.zip`, `node_modules.zip`) que nao devem entrar em versionamento ou deploy.
 
 ## O que falta para SaaS vendavel
 
-1. Repositorio e deploy limpos: inicializar Git dentro de `lucro-da-carne`, configurar remoto GitHub, remover artefatos locais grandes do pacote de deploy e publicar em Vercel/Netlify/Sites.
+1. Deploy limpo: remover artefatos locais grandes do pacote de deploy e publicar em Vercel/Netlify/Sites.
 2. Ambiente de producao: configurar dominio, HTTPS, variaveis Supabase e links publicos de checkout.
 3. Checkout completo: publicar links Kirvano por plano, testar webhook com compra aprovada, reembolso/chargeback e comprador sem conta.
 4. Conta e suporte: reset de senha, troca de e-mail, cancelamento/gestao de assinatura, canal de suporte e mensagens melhores para limite de plano.
@@ -29,6 +29,7 @@
 ## Melhorias executadas neste passe
 
 - Criada a tela `/planos` com planos Gratis, Pro e Business.
+- Precificacao exibida: Gratis R$ 0, Pro R$ 49/mes e Business R$ 149/mes.
 - Centralizados dados dos planos em `src/lib/plans.ts`.
 - Adicionado CTA de planos no menu e na pagina de conta.
 - Melhoradas mensagens de erro quando o banco bloqueia salvamento de lotes por permissao, plano ou limite.
@@ -38,13 +39,15 @@
 
 ## Checklist de lancamento
 
-- [ ] Criar repo Git limpo dentro de `C:\Users\samue\lucro-da-carne`.
+- [x] Criar repo Git limpo dentro de `C:\Users\samue\lucro-da-carne`.
 - [ ] Remover do diretorio de deploy os arquivos `.env.local.zip` e `node_modules.zip`.
 - [ ] Definir `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` de producao.
 - [ ] Definir `NEXT_PUBLIC_KIRVANO_PRO_CHECKOUT_URL` e `NEXT_PUBLIC_KIRVANO_BUSINESS_CHECKOUT_URL`.
 - [ ] Aplicar migrations em um projeto Supabase de producao.
 - [ ] Configurar `KIRVANO_WEBHOOK_TOKEN` e `KIRVANO_APP_URL` nas secrets da Edge Function.
 - [ ] Cadastrar produtos Kirvano em `/admin`.
+- [ ] Cadastrar o produto Kirvano Pro como `pro`, limite 50, R$ 49 no checkout.
+- [ ] Cadastrar o produto Kirvano Business como `business`, limite 9999, R$ 149 no checkout.
 - [ ] Fazer uma compra teste aprovada e validar liberacao do plano.
 - [ ] Testar chargeback/reembolso e expiracao de acesso.
 - [ ] Rodar `npm run lint`, `npm run build` e `npm audit`.

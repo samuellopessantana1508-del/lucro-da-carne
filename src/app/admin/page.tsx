@@ -9,6 +9,7 @@ import MetricCard from "@/components/MetricCard";
 import { useAuth } from "@/hooks/useAuth";
 import type { Database, SubscriptionPlan, SubscriptionStatus } from "@/lib/database.types";
 import { formatDateBR } from "@/lib/format";
+import { PLAN_DEFAULT_LIMITS } from "@/lib/plans";
 import { getSupabaseBrowserClient } from "@/lib/supabase";
 
 type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
@@ -384,7 +385,15 @@ export default function AdminPage() {
                 </div>
                 <div>
                   <label className="label">Limite de lotes</label>
-                  <input name="lotsLimit" type="number" min="0" step="1" className="input-field" defaultValue="9999" required />
+                  <input
+                    name="lotsLimit"
+                    type="number"
+                    min="0"
+                    step="1"
+                    className="input-field"
+                    defaultValue={PLAN_DEFAULT_LIMITS.pro}
+                    required
+                  />
                 </div>
                 <div>
                   <label className="label">Dias de acesso</label>

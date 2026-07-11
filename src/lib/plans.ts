@@ -20,13 +20,19 @@ export const PLAN_LABELS: Record<SubscriptionPlan, string> = {
 
 export const PLAN_DISPLAY_ORDER: SubscriptionPlan[] = ["gratis", "pro", "business"];
 
+export const PLAN_DEFAULT_LIMITS: Record<SubscriptionPlan, number> = {
+  gratis: 5,
+  pro: 50,
+  business: 9999,
+};
+
 export const APP_PLANS: AppPlan[] = [
   {
     id: "gratis",
     name: PLAN_LABELS.gratis,
     price: "R$ 0",
     cadence: "para testar",
-    lotLimit: "Ate 5 lotes",
+    lotLimit: `Ate ${PLAN_DEFAULT_LIMITS.gratis} lotes`,
     description: "Para validar a calculadora no dia a dia antes de assinar.",
     features: [
       "Calculo de rendimento e quebra",
@@ -38,13 +44,13 @@ export const APP_PLANS: AppPlan[] = [
   {
     id: "pro",
     name: PLAN_LABELS.pro,
-    price: "Plano pago",
-    cadence: "por acougue",
+    price: "R$ 49",
+    cadence: "/mes por acougue",
     badge: "Mais indicado",
-    lotLimit: "Limite configuravel",
+    lotLimit: `Ate ${PLAN_DEFAULT_LIMITS.pro} lotes`,
     description: "Para acougues e casas de carne que acompanham fornecedores e margem toda semana.",
     features: [
-      "Mais lotes salvos na nuvem",
+      `Ate ${PLAN_DEFAULT_LIMITS.pro} lotes salvos na nuvem`,
       "Dashboard por lote e fornecedor",
       "PDFs para conferencia interna",
       "Acesso liberado por compra Kirvano",
@@ -54,12 +60,12 @@ export const APP_PLANS: AppPlan[] = [
   {
     id: "business",
     name: PLAN_LABELS.business,
-    price: "Sob medida",
-    cadence: "para operacoes maiores",
-    lotLimit: "Limite ampliado",
+    price: "R$ 149",
+    cadence: "/mes para equipes",
+    lotLimit: "Lotes ilimitados",
     description: "Para equipes, varios pontos de venda ou operacoes com maior volume de lotes.",
     features: [
-      "Limite alto ou ilimitado de lotes",
+      "Lotes ilimitados na nuvem",
       "Gestao manual pelo painel admin",
       "Acompanhamento de clientes e planos",
       "Preparado para suporte comercial",
@@ -71,4 +77,3 @@ export const APP_PLANS: AppPlan[] = [
 export function getPlanLabel(plan?: SubscriptionPlan | null): string {
   return plan ? PLAN_LABELS[plan] : PLAN_LABELS.gratis;
 }
-

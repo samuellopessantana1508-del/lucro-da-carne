@@ -81,6 +81,10 @@ O schema cria:
 
 Por padrao, novos usuarios entram no plano `gratis` com limite de 5 lotes. A conta administradora pode alterar plano, status e limite em `/admin`.
 
+- `gratis`: R$ 0, ate 5 lotes.
+- `pro`: R$ 49/mes, ate 50 lotes.
+- `business`: R$ 149/mes, lotes ilimitados.
+
 Para liberar o primeiro administrador, cadastre a sua conta e execute uma unica vez no SQL Editor do Supabase:
 
 ```sql
@@ -120,7 +124,6 @@ O arquivo [`docs/SAAS_READINESS.md`](docs/SAAS_READINESS.md) lista o prompt oper
 
 Pontos criticos antes de publicar:
 
-- Criar um repositorio Git limpo dentro de `C:\Users\samue\lucro-da-carne`; hoje o `.git` detectado esta em `C:\Users\samue`.
 - Remover artefatos locais grandes do pacote de deploy, como `.env.local.zip` e `node_modules.zip`.
 - Configurar dominio, Site URL do Supabase, secrets da Edge Function e produtos Kirvano.
 - Testar compra aprovada, reembolso/chargeback, comprador sem conta e limite de plano.
