@@ -20,8 +20,10 @@ export const PLAN_LABELS: Record<SubscriptionPlan, string> = {
 
 export const PLAN_DISPLAY_ORDER: SubscriptionPlan[] = ["gratis", "pro", "business"];
 
+export const FREE_TRIAL_DAYS = 3;
+
 export const PLAN_DEFAULT_LIMITS: Record<SubscriptionPlan, number> = {
-  gratis: 3,
+  gratis: 9999,
   pro: 50,
   business: 9999,
 };
@@ -31,12 +33,12 @@ export const APP_PLANS: AppPlan[] = [
     id: "gratis",
     name: PLAN_LABELS.gratis,
     price: "R$ 0",
-    cadence: "para testar",
-    lotLimit: `Ate ${PLAN_DEFAULT_LIMITS.gratis} lotes`,
+    cadence: `por ${FREE_TRIAL_DAYS} dias`,
+    lotLimit: `${FREE_TRIAL_DAYS} dias de teste`,
     description: "Para validar a calculadora no dia a dia antes de assinar.",
     features: [
-      "Calculo de rendimento e quebra",
-      "Historico local ou em conta Supabase",
+      `Acesso completo por ${FREE_TRIAL_DAYS} dias`,
+      "Calculo de rendimento, quebra e lucro",
       "Relatorio copiavel e PDF",
       "Dashboard basico de lotes",
     ],

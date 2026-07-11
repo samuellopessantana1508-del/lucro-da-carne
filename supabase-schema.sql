@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS public.subscriptions (
   user_id UUID NOT NULL UNIQUE REFERENCES public.profiles(id) ON DELETE CASCADE,
   plan TEXT NOT NULL DEFAULT 'gratis' CHECK (plan IN ('gratis', 'pro', 'business')),
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'past_due', 'canceled', 'expired')),
-  lots_limit INTEGER NOT NULL DEFAULT 3 CHECK (lots_limit >= 0),
+  lots_limit INTEGER NOT NULL DEFAULT 9999 CHECK (lots_limit >= 0),
   provider TEXT NOT NULL DEFAULT 'manual' CHECK (provider IN ('manual', 'stripe', 'mercado_pago', 'kirvano')),
   provider_customer_id TEXT,
   provider_subscription_id TEXT,
@@ -134,8 +134,8 @@ BEGIN
     NULLIF(NEW.raw_user_meta_data ->> 'business_name', '')
   );
 
-  INSERT INTO public.subscriptions (user_id, plan, status, lots_limit)
-  VALUES (NEW.id, 'gratis', 'active', 3);
+  INSERT INTO public.subscriptions (user_id, plan, status, lots_limit, expires_at)
+  VALUES (NEW.id, 'gratis', 'active', 9999, now() + interval '3 days');
 
   SELECT *
   INTO pending_grant

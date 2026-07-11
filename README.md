@@ -79,9 +79,9 @@ O schema cria:
 
 ## Planos
 
-Por padrao, novos usuarios entram no plano `gratis` com limite de 3 lotes. A conta administradora pode alterar plano, status e limite em `/admin`.
+Por padrao, novos usuarios entram no plano `gratis` com teste de 3 dias. A conta administradora pode alterar plano, status, validade e limite em `/admin`.
 
-- `gratis`: R$ 0, ate 3 lotes.
+- `gratis`: R$ 0, teste por 3 dias.
 - `pro`: R$ 49/mes, ate 50 lotes.
 - `business`: R$ 149/ano, lotes ilimitados.
 

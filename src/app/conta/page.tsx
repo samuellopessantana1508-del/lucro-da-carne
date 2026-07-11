@@ -35,12 +35,12 @@ export default function ContaPage() {
     if (!loaded || loadedFor !== userId) void loadLots(userId);
   }, [loaded, loadedFor, loadLots, userId]);
 
-  const usedLimit = subscription?.lots_limit ?? 0;
-  const remainingLots = useMemo(() => {
-    if (!subscription) return null;
-    if (subscription.lots_limit >= 9999) return "Ilimitado";
-    return String(Math.max(0, subscription.lots_limit - lots.length));
-  }, [lots.length, subscription]);
+  const lotLimit = subscription?.lots_limit ?? 0;
+  const validityLabel = useMemo(() => {
+    if (!subscription) return "-";
+    if (subscription.expires_at) return formatDateBR(subscription.expires_at.slice(0, 10));
+    return "Sem vencimento";
+  }, [subscription]);
 
   async function saveProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -152,13 +152,13 @@ export default function ContaPage() {
           <div className="space-y-6">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <MetricCard label="Plano" value={subscription?.plan ?? "gratis"} icon={Cloud} />
+              <MetricCard label="Validade" value={validityLabel} icon={Save} />
               <MetricCard label="Lotes na conta" value={String(lots.length)} icon={Database} />
               <MetricCard
                 label="Limite de lotes"
-                value={usedLimit >= 9999 ? "Ilimitado" : String(usedLimit || "-")}
+                value={lotLimit >= 9999 ? "Ilimitado" : String(lotLimit || "-")}
                 icon={Upload}
               />
-              <MetricCard label="Restantes" value={remainingLots ?? "-"} icon={Save} />
             </div>
 
             <div className="card p-5 sm:p-6">
