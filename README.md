@@ -79,11 +79,11 @@ O schema cria:
 
 ## Planos
 
-Por padrao, novos usuarios entram no plano `gratis` com limite de 5 lotes. A conta administradora pode alterar plano, status e limite em `/admin`.
+Por padrao, novos usuarios entram no plano `gratis` com limite de 3 lotes. A conta administradora pode alterar plano, status e limite em `/admin`.
 
-- `gratis`: R$ 0, ate 5 lotes.
+- `gratis`: R$ 0, ate 3 lotes.
 - `pro`: R$ 49/mes, ate 50 lotes.
-- `business`: R$ 149/mes, lotes ilimitados.
+- `business`: R$ 149/ano, lotes ilimitados.
 
 Para liberar o primeiro administrador, cadastre a sua conta e execute uma unica vez no SQL Editor do Supabase:
 

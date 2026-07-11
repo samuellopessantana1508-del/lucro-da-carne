@@ -21,7 +21,7 @@ export const PLAN_LABELS: Record<SubscriptionPlan, string> = {
 export const PLAN_DISPLAY_ORDER: SubscriptionPlan[] = ["gratis", "pro", "business"];
 
 export const PLAN_DEFAULT_LIMITS: Record<SubscriptionPlan, number> = {
-  gratis: 5,
+  gratis: 3,
   pro: 50,
   business: 9999,
 };
@@ -61,7 +61,7 @@ export const APP_PLANS: AppPlan[] = [
     id: "business",
     name: PLAN_LABELS.business,
     price: "R$ 149",
-    cadence: "/mes para equipes",
+    cadence: "/ano para equipes",
     lotLimit: "Lotes ilimitados",
     description: "Para equipes, varios pontos de venda ou operacoes com maior volume de lotes.",
     features: [

@@ -29,7 +29,7 @@
 ## Melhorias executadas neste passe
 
 - Criada a tela `/planos` com planos Gratis, Pro e Business.
-- Precificacao exibida: Gratis R$ 0, Pro R$ 49/mes e Business R$ 149/mes.
+- Precificacao exibida: Gratis R$ 0 com 3 lotes, Pro R$ 49/mes e Business R$ 149/ano.
 - Centralizados dados dos planos em `src/lib/plans.ts`.
 - Adicionado CTA de planos no menu e na pagina de conta.
 - Melhoradas mensagens de erro quando o banco bloqueia salvamento de lotes por permissao, plano ou limite.
@@ -47,7 +47,7 @@
 - [ ] Configurar `KIRVANO_WEBHOOK_TOKEN` e `KIRVANO_APP_URL` nas secrets da Edge Function.
 - [ ] Cadastrar produtos Kirvano em `/admin`.
 - [ ] Cadastrar o produto Kirvano Pro como `pro`, limite 50, R$ 49 no checkout.
-- [ ] Cadastrar o produto Kirvano Business como `business`, limite 9999, R$ 149 no checkout.
+- [ ] Cadastrar o produto Kirvano Business como `business`, limite 9999, R$ 149/ano no checkout.
 - [ ] Fazer uma compra teste aprovada e validar liberacao do plano.
 - [ ] Testar chargeback/reembolso e expiracao de acesso.
 - [ ] Rodar `npm run lint`, `npm run build` e `npm audit`.
