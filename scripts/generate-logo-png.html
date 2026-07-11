@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Lucro da Carne - Gerar Logo PNG</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #f5f5f5; padding: 40px; }
+    h1 { color: #4A0F14; }
+    .logos { display: flex; gap: 30px; flex-wrap: wrap; margin: 30px 0; }
+    .logo-box { text-align: center; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .logo-box h3 { color: #4A0F14; margin-bottom: 10px; }
+    canvas { border: 1px dashed #ccc; }
+    a.download { display: inline-block; margin-top: 10px; background: #7A1E24; color: white; padding: 8px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; }
+    a.download:hover { background: #4A0F14; }
+    .note { color: #8A8178; font-size: 14px; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>Lucro da Carne - Logo PNG</h1>
+  <p>Clique em "Baixar PNG" para salvar cada tamanho.</p>
+
+  <div class="logos">
+    <div class="logo-box">
+      <h3>512x512 (Instagram / Redes)</h3>
+      <canvas id="c512" width="512" height="512"></canvas><br>
+      <a id="dl512" class="download" download="lucro-da-carne-logo-512.png">Baixar PNG</a>
+    </div>
+    <div class="logo-box">
+      <h3>192x192 (PWA / App)</h3>
+      <canvas id="c192" width="192" height="192"></canvas><br>
+      <a id="dl192" class="download" download="lucro-da-carne-logo-192.png">Baixar PNG</a>
+    </div>
+    <div class="logo-box">
+      <h3>64x64 (Favicon)</h3>
+      <canvas id="c64" width="64" height="64"></canvas><br>
+      <a id="dl64" class="download" download="lucro-da-carne-favicon-64.png">Baixar PNG</a>
+    </div>
+    <div class="logo-box">
+      <h3>1024x1024 (Alta resolucao)</h3>
+      <canvas id="c1024" width="1024" height="1024"></canvas><br>
+      <a id="dl1024" class="download" download="lucro-da-carne-logo-1024.png">Baixar PNG</a>
+    </div>
+  </div>
+
+  <p class="note">Os PNGs tem fundo transparente com o circulo burgundy. Use para Instagram, WhatsApp, materiais de marketing, etc.</p>
+
+<script>
+function drawLogo(ctx, size) {
+  const s = size / 512;
+  ctx.save();
+  ctx.scale(s, s);
+
+  // Background circle
+  ctx.beginPath();
+  ctx.arc(256, 256, 250, 0, Math.PI * 2);
+  ctx.fillStyle = '#4A0F14';
+  ctx.fill();
+
+  ctx.save();
+  ctx.translate(256, 256);
+
+  // Main steak shape - filled
+  ctx.beginPath();
+  ctx.moveTo(-60, -80);
+  ctx.bezierCurveTo(-20, -110, 50, -100, 80, -60);
+  ctx.bezierCurveTo(110, -20, 100, 50, 70, 80);
+  ctx.bezierCurveTo(40, 110, -30, 110, -60, 80);
+  ctx.bezierCurveTo(-95, 50, -100, -50, -60, -80);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(200, 155, 60, 0.15)';
+  ctx.fill();
+
+  // Outline
+  ctx.strokeStyle = '#C89B3C';
+  ctx.lineWidth = 14;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+
+  // Marbling lines
+  ctx.lineWidth = 14;
+  ctx.beginPath();
+  ctx.moveTo(-30, -50);
+  ctx.bezierCurveTo(0, -60, 30, -40, 55, -15);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(-45, -10);
+  ctx.bezierCurveTo(-10, -25, 25, -5, 55, 15);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(-35, 30);
+  ctx.bezierCurveTo(0, 15, 30, 35, 55, 50);
+  ctx.stroke();
+
+  // Bone outer
+  ctx.beginPath();
+  ctx.arc(-35, -40, 18, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(200, 155, 60, 0.3)';
+  ctx.fill();
+  ctx.stroke();
+
+  // Bone inner
+  ctx.beginPath();
+  ctx.arc(-35, -40, 8, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.restore();
+  ctx.restore();
+}
+
+[1024, 512, 192, 64].forEach(size => {
+  const canvas = document.getElementById('c' + size);
+  const ctx = canvas.getContext('2d');
+  drawLogo(ctx, size);
+  const link = document.getElementById('dl' + size);
+  link.href = canvas.toDataURL('image/png');
+});
+</script>
+</body>
+</html>

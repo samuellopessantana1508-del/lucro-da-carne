@@ -1,0 +1,279 @@
+-- Lucro da Carne - schema SaaS para Supabase/PostgreSQL.
+-- Esta mesma estrutura e aplicada pela migration em supabase/migrations.
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+-- Perfis de aplicacao: mantem apenas os dados necessarios fora de auth.users.
+CREATE TABLE IF NOT EXISTS public.profiles (
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  email TEXT NOT NULL,
+  name TEXT NOT NULL DEFAULT '',
+  business_name TEXT,
+  phone TEXT,
+  role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Lotes pertencem a um unico usuario e sao protegidos por RLS.
+CREATE TABLE IF NOT EXISTS public.lots (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  type TEXT NOT NULL DEFAULT 'traseiro',
+  supplier TEXT NOT NULL DEFAULT '',
+  date DATE NOT NULL DEFAULT CURRENT_DATE,
+  input_weight_kg NUMERIC NOT NULL CHECK (input_weight_kg >= 0),
+  cost_per_kg NUMERIC NOT NULL CHECK (cost_per_kg >= 0),
+  total_cost NUMERIC NOT NULL CHECK (total_cost >= 0),
+  desired_margin_percent NUMERIC NOT NULL DEFAULT 30 CHECK (desired_margin_percent >= 0),
+  notes TEXT NOT NULL DEFAULT '',
+  cuts JSONB NOT NULL DEFAULT '[]'::jsonb,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Estado de assinatura independente do provedor de pagamento.
+CREATE TABLE IF NOT EXISTS public.subscriptions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL UNIQUE REFERENCES public.profiles(id) ON DELETE CASCADE,
+  plan TEXT NOT NULL DEFAULT 'gratis' CHECK (plan IN ('gratis', 'pro', 'business')),
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'past_due', 'canceled', 'expired')),
+  lots_limit INTEGER NOT NULL DEFAULT 5 CHECK (lots_limit >= 0),
+  provider TEXT NOT NULL DEFAULT 'manual' CHECK (provider IN ('manual', 'stripe', 'mercado_pago')),
+  provider_customer_id TEXT,
+  provider_subscription_id TEXT,
+  current_period_start TIMESTAMPTZ,
+  current_period_end TIMESTAMPTZ,
+  cancel_at_period_end BOOLEAN NOT NULL DEFAULT false,
+  started_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  expires_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Eventos recebidos de gateways de pagamento. Nao ficam acessiveis no cliente.
+CREATE TABLE IF NOT EXISTS public.billing_events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+  provider TEXT NOT NULL CHECK (provider IN ('stripe', 'mercado_pago')),
+  provider_event_id TEXT NOT NULL,
+  event_type TEXT NOT NULL,
+  payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+  status TEXT NOT NULL DEFAULT 'received' CHECK (status IN ('received', 'processed', 'failed')),
+  error_message TEXT,
+  processed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (provider, provider_event_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_lots_user_created_at ON public.lots(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_subscriptions_status ON public.subscriptions(status);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_subscriptions_provider_subscription
+  ON public.subscriptions(provider, provider_subscription_id)
+  WHERE provider_subscription_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_billing_events_user_created_at
+  ON public.billing_events(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_billing_events_status_created_at
+  ON public.billing_events(status, created_at DESC);
+
+-- Cria o perfil e o plano gratuito na mesma transacao do cadastro do Auth.
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+BEGIN
+  INSERT INTO public.profiles (id, email, name, business_name)
+  VALUES (
+    NEW.id,
+    NEW.email,
+    COALESCE(NEW.raw_user_meta_data ->> 'name', ''),
+    NULLIF(NEW.raw_user_meta_data ->> 'business_name', '')
+  );
+
+  INSERT INTO public.subscriptions (user_id, plan, status, lots_limit)
+  VALUES (NEW.id, 'gratis', 'active', 5);
+
+  RETURN NEW;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.update_updated_at()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SET search_path = ''
+AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$;
+
+-- A funcao e usada somente pelas politicas RLS e nunca confia em metadata editavel do usuario.
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS BOOLEAN
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.profiles
+    WHERE id = (SELECT auth.uid())
+      AND role = 'admin'
+  );
+$$;
+
+-- Impede a criacao de novos lotes apos o limite ou expiracao do plano.
+CREATE OR REPLACE FUNCTION public.can_insert_lot(target_user_id UUID)
+RETURNS BOOLEAN
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+  SELECT target_user_id = (SELECT auth.uid())
+    AND COALESCE((
+      SELECT s.status = 'active'
+        AND (s.expires_at IS NULL OR s.expires_at > now())
+        AND (
+          s.lots_limit >= 9999
+          OR (
+            SELECT count(*)
+            FROM public.lots l
+            WHERE l.user_id = target_user_id
+          ) < s.lots_limit
+        )
+      FROM public.subscriptions s
+      WHERE s.user_id = target_user_id
+    ), false);
+$$;
+
+REVOKE ALL ON FUNCTION public.handle_new_user() FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.update_updated_at() FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.is_admin() FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.can_insert_lot(UUID) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.is_admin() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.can_insert_lot(UUID) TO authenticated;
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+DROP TRIGGER IF EXISTS set_profiles_updated_at ON public.profiles;
+CREATE TRIGGER set_profiles_updated_at
+  BEFORE UPDATE ON public.profiles
+  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+
+DROP TRIGGER IF EXISTS set_lots_updated_at ON public.lots;
+CREATE TRIGGER set_lots_updated_at
+  BEFORE UPDATE ON public.lots
+  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+
+DROP TRIGGER IF EXISTS set_subscriptions_updated_at ON public.subscriptions;
+CREATE TRIGGER set_subscriptions_updated_at
+  BEFORE UPDATE ON public.subscriptions
+  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+
+-- A Data API so expoe as tabelas que o cliente precisa. billing_events e interno.
+REVOKE ALL ON TABLE public.profiles, public.lots, public.subscriptions, public.billing_events
+  FROM PUBLIC, anon, authenticated;
+GRANT USAGE ON SCHEMA public TO anon, authenticated;
+GRANT SELECT ON public.profiles TO authenticated;
+GRANT UPDATE (name, business_name, phone, updated_at) ON public.profiles TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.lots TO authenticated;
+GRANT SELECT ON public.subscriptions TO authenticated;
+GRANT UPDATE (
+  plan,
+  status,
+  lots_limit,
+  provider,
+  provider_customer_id,
+  provider_subscription_id,
+  current_period_start,
+  current_period_end,
+  cancel_at_period_end,
+  expires_at,
+  updated_at
+) ON public.subscriptions TO authenticated;
+
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lots ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.subscriptions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.billing_events ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS profiles_select_own ON public.profiles;
+CREATE POLICY profiles_select_own
+  ON public.profiles FOR SELECT
+  TO authenticated
+  USING ((SELECT auth.uid()) = id);
+
+DROP POLICY IF EXISTS profiles_update_own ON public.profiles;
+CREATE POLICY profiles_update_own
+  ON public.profiles FOR UPDATE
+  TO authenticated
+  USING ((SELECT auth.uid()) = id)
+  WITH CHECK ((SELECT auth.uid()) = id);
+
+DROP POLICY IF EXISTS profiles_select_admin ON public.profiles;
+CREATE POLICY profiles_select_admin
+  ON public.profiles FOR SELECT
+  TO authenticated
+  USING ((SELECT public.is_admin()));
+
+DROP POLICY IF EXISTS lots_select_own ON public.lots;
+CREATE POLICY lots_select_own
+  ON public.lots FOR SELECT
+  TO authenticated
+  USING ((SELECT auth.uid()) = user_id);
+
+DROP POLICY IF EXISTS lots_insert_own ON public.lots;
+CREATE POLICY lots_insert_own
+  ON public.lots FOR INSERT
+  TO authenticated
+  WITH CHECK (
+    (SELECT auth.uid()) = user_id
+    AND (SELECT public.can_insert_lot(user_id))
+  );
+
+DROP POLICY IF EXISTS lots_update_own ON public.lots;
+CREATE POLICY lots_update_own
+  ON public.lots FOR UPDATE
+  TO authenticated
+  USING ((SELECT auth.uid()) = user_id)
+  WITH CHECK ((SELECT auth.uid()) = user_id);
+
+DROP POLICY IF EXISTS lots_delete_own ON public.lots;
+CREATE POLICY lots_delete_own
+  ON public.lots FOR DELETE
+  TO authenticated
+  USING ((SELECT auth.uid()) = user_id);
+
+DROP POLICY IF EXISTS lots_select_admin ON public.lots;
+CREATE POLICY lots_select_admin
+  ON public.lots FOR SELECT
+  TO authenticated
+  USING ((SELECT public.is_admin()));
+
+DROP POLICY IF EXISTS subscriptions_select_own ON public.subscriptions;
+CREATE POLICY subscriptions_select_own
+  ON public.subscriptions FOR SELECT
+  TO authenticated
+  USING ((SELECT auth.uid()) = user_id);
+
+DROP POLICY IF EXISTS subscriptions_select_admin ON public.subscriptions;
+CREATE POLICY subscriptions_select_admin
+  ON public.subscriptions FOR SELECT
+  TO authenticated
+  USING ((SELECT public.is_admin()));
+
+DROP POLICY IF EXISTS subscriptions_update_admin ON public.subscriptions;
+CREATE POLICY subscriptions_update_admin
+  ON public.subscriptions FOR UPDATE
+  TO authenticated
+  USING ((SELECT public.is_admin()))
+  WITH CHECK ((SELECT public.is_admin()));

@@ -1,0 +1,2 @@
+[functions.kirvano-webhook]
+verify_jwt = false

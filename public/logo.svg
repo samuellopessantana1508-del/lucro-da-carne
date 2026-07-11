@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="256" fill="#4A0F14"/>
+  <!-- Beef/meat icon in gold - based on Lucide Beef style -->
+  <g transform="translate(256,256) scale(1.0)" stroke="#C89B3C" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <!-- Main steak outline -->
+    <path d="M-60,-80 C-20,-110 50,-100 80,-60 C110,-20 100,50 70,80 C40,110 -30,110 -60,80 C-95,50 -100,-50 -60,-80Z" fill="#C89B3C" fill-opacity="0.15"/>
+    <path d="M-60,-80 C-20,-110 50,-100 80,-60 C110,-20 100,50 70,80 C40,110 -30,110 -60,80 C-95,50 -100,-50 -60,-80Z"/>
+    <!-- Marbling lines -->
+    <path d="M-30,-50 C0,-60 30,-40 55,-15"/>
+    <path d="M-45,-10 C-10,-25 25,-5 55,15"/>
+    <path d="M-35,30 C0,15 30,35 55,50"/>
+    <!-- Bone -->
+    <circle cx="-35" cy="-40" r="18" fill="#C89B3C" fill-opacity="0.3"/>
+    <circle cx="-35" cy="-40" r="8" fill="none"/>
+  </g>
+</svg>
