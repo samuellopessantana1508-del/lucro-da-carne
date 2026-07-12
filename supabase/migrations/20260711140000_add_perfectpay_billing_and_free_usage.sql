@@ -9,6 +9,69 @@ ALTER TABLE public.subscriptions
   ADD COLUMN IF NOT EXISTS cancelled_at TIMESTAMPTZ,
   ADD COLUMN IF NOT EXISTS free_uses_consumed INTEGER NOT NULL DEFAULT 0;
 
+-- Normalize the legacy production plan codes before Perfect Pay starts writing
+-- the application plan codes used by the current frontend and webhooks.
+ALTER TABLE public.subscriptions
+  DROP CONSTRAINT IF EXISTS subscriptions_plan_check;
+ALTER TABLE public.billing_products
+  DROP CONSTRAINT IF EXISTS billing_products_plan_check;
+ALTER TABLE public.billing_access_grants
+  DROP CONSTRAINT IF EXISTS billing_access_grants_plan_check;
+ALTER TABLE public.plans
+  DROP CONSTRAINT IF EXISTS plans_code_check,
+  DROP CONSTRAINT IF EXISTS plans_supported_codes;
+
+UPDATE public.subscriptions
+SET plan = CASE plan
+  WHEN 'mensal' THEN 'pro'
+  WHEN 'anual' THEN 'business'
+  ELSE plan
+END
+WHERE plan IN ('mensal', 'anual');
+
+UPDATE public.billing_products
+SET plan = CASE plan
+  WHEN 'mensal' THEN 'pro'
+  WHEN 'anual' THEN 'business'
+  ELSE plan
+END
+WHERE plan IN ('mensal', 'anual');
+
+UPDATE public.billing_access_grants
+SET plan = CASE plan
+  WHEN 'mensal' THEN 'pro'
+  WHEN 'anual' THEN 'business'
+  ELSE plan
+END
+WHERE plan IN ('mensal', 'anual');
+
+UPDATE public.plans
+SET
+  code = CASE code
+    WHEN 'mensal' THEN 'pro'
+    WHEN 'anual' THEN 'business'
+    ELSE code
+  END,
+  name = CASE code
+    WHEN 'mensal' THEN 'Pro'
+    WHEN 'anual' THEN 'Business'
+    ELSE name
+  END
+WHERE code IN ('mensal', 'anual');
+
+ALTER TABLE public.subscriptions
+  ADD CONSTRAINT subscriptions_plan_check
+  CHECK (plan IN ('gratis', 'pro', 'business'));
+ALTER TABLE public.billing_products
+  ADD CONSTRAINT billing_products_plan_check
+  CHECK (plan IN ('pro', 'business'));
+ALTER TABLE public.billing_access_grants
+  ADD CONSTRAINT billing_access_grants_plan_check
+  CHECK (plan IN ('pro', 'business'));
+ALTER TABLE public.plans
+  ADD CONSTRAINT plans_code_check
+  CHECK (code IN ('pro', 'business'));
+
 ALTER TABLE public.subscriptions
   DROP CONSTRAINT IF EXISTS subscriptions_provider_check;
 ALTER TABLE public.subscriptions
