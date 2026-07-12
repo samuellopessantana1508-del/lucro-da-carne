@@ -26,15 +26,15 @@
 
 ## O que ainda falta para SaaS vendavel
 
-1. Aplicar migrations em um projeto Supabase de producao.
-2. Publicar a Edge Function `perfectpay-webhook` e configurar secrets reais.
-3. Criar produto/planos na Perfect Pay e preencher os codigos reais nas secrets.
-4. Publicar checkout mensal/anual e preencher os links publicos `NEXT_PUBLIC_PERFECTPAY_*`.
-5. Configurar dominio, Site URL e Redirect URLs do Supabase, incluindo `/definir-senha`.
-6. Configurar SMTP do Supabase para convites e reset de senha com remetente do produto.
-7. Testar compra aprovada, duplicada, autorizada, cancelada, reembolsada, chargeback, comprador sem conta e plano desconhecido.
-8. Adicionar termos, privacidade, LGPD, politica de reembolso, suporte e rotina de exclusao/exportacao de dados.
-9. Configurar monitoramento, backups Supabase, alertas de webhook e CI no GitHub.
+As migrations, a Edge Function, o dominio, o SSL, o deploy automatico e as variaveis publicas do Supabase ja estao ativos em producao.
+
+1. Criar produto/planos na Perfect Pay e preencher os codigos reais nas secrets.
+2. Publicar checkout mensal/anual e preencher os links publicos `NEXT_PUBLIC_PERFECTPAY_*`.
+3. Configurar Site URL e Redirect URLs do Supabase, incluindo `/definir-senha`.
+4. Configurar SMTP do Supabase e aplicar o template `supabase/templates/invite.html`.
+5. Executar a homologacao de compra, duplicidade, revogacao, convite e renovacao.
+6. Adicionar termos, privacidade, LGPD, politica de reembolso, suporte e rotina de exclusao/exportacao de dados.
+7. Configurar monitoramento, backups Supabase e alertas de webhook.
 
 ## Variaveis de producao
 
