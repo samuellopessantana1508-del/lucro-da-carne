@@ -77,10 +77,11 @@ function mapLotWriteError(error: unknown, fallback: string): Error {
   if (
     normalized.includes("row-level security") ||
     normalized.includes("permission denied") ||
-    normalized.includes("violates row-level security")
+    normalized.includes("violates row-level security") ||
+    normalized.includes("subscription_access_expired")
   ) {
     return new Error(
-      `${fallback} Verifique se sua assinatura esta ativa ou se ainda ha usos gratis disponiveis.`
+      `${fallback} Verifique se sua assinatura esta ativa ou se o periodo gratis de 3 dias terminou.`
     );
   }
 

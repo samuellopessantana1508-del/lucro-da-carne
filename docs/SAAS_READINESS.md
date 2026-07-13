@@ -2,7 +2,7 @@
 
 ## Prompt operacional executado
 
-> Analise completamente o projeto existente do SaaS Lucro da Carne antes de alterar qualquer arquivo. Depois implemente a integracao de producao entre Lucro da Carne, Perfect Pay e Supabase, com plano gratuito de 3 usos totais, mensal R$ 49,90, anual R$ 149,90, webhook seguro, idempotencia, convites Supabase, RLS, auditoria admin, documentacao e validacao.
+> Analise completamente o projeto existente do SaaS Lucro da Carne antes de alterar qualquer arquivo. Depois implemente a integracao de producao entre Lucro da Carne, Perfect Pay e Supabase, com plano gratuito de 3 dias e uso ilimitado, mensal R$ 49,90, anual R$ 149,90, webhook seguro, idempotencia, convites Supabase, RLS, auditoria admin, documentacao e validacao.
 
 ## Estado encontrado
 
@@ -15,11 +15,11 @@
 
 ## Melhorias executadas neste passe
 
-- Plano gratuito ajustado para 3 usos totais salvos na nuvem.
+- Plano gratuito ajustado para uso ilimitado durante 3 dias desde o cadastro.
 - Planos pagos ajustados para Pro R$ 49,90/mes e Business R$ 149,90/ano, ambos com uso ilimitado enquanto ativos.
 - Migration `20260711140000_add_perfectpay_billing_and_free_usage.sql` adicionada com colunas Perfect Pay, ciclo de cobranca, consumo gratis, funcoes privadas e trigger transacional de uso.
 - Edge Function `perfectpay-webhook` adicionada com token seguro, validacao de produto/plano/e-mail, idempotencia, status Perfect Pay e convites Supabase.
-- Conta mostra uso gratis restante, ciclo/validade e acoes de senha/suporte.
+- Conta mostra validade do periodo gratis, ciclo de cobranca e acoes de senha/suporte.
 - Admin ganhou busca por e-mail/plano/status/codigo de venda e historico resumido de eventos sem payload bruto.
 - Criada rota `/definir-senha` para convites e reset de senha.
 - `.env.local.example`, README e fixtures de teste Perfect Pay atualizados.

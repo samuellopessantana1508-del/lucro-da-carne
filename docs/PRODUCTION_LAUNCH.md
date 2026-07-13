@@ -6,7 +6,7 @@
 - Hospedagem: Web App Next.js, Node 22, branch `main`, deploy automatico pelo GitHub.
 - Supabase: projeto `arosnbldkgvbqhwnwfcr`, tabelas com RLS e migrations aplicadas.
 - Webhook: `perfectpay-webhook` publicado sem JWT porque valida token proprio.
-- Gratuito: 3 usos totais, consumidos transacionalmente no banco.
+- Gratuito: uso ilimitado por 3 dias desde o cadastro, validado no banco.
 - Pro: R$ 49,90 por mes, uso ilimitado enquanto vigente.
 - Business: R$ 149,90 por ano, uso ilimitado enquanto vigente.
 
@@ -66,10 +66,10 @@ Depois de aplicar as duas variaveis, aguarde a reimplantacao automatica e confir
 - Compra anual aprovada libera Business.
 - Reenvio do mesmo webhook retorna duplicado sem estender periodo.
 - Status autorizado ou pendente nao libera acesso.
-- Cancelamento, reembolso e chargeback retornam ao gratuito sem apagar lotes.
+- Cancelamento, reembolso e chargeback encerram o acesso sem apagar lotes.
 - Evento completo nao duplica acesso.
 - Convite leva para `/definir-senha`.
-- Quarto uso gratuito e bloqueado pelo banco.
+- Acesso gratuito e bloqueado pelo banco apos 3 dias.
 - Cliente autenticado nao consegue alterar plano ou status.
 - Logs e `billing_events` registram falhas sem expor documento ou token.
 

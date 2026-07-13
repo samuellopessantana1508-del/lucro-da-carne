@@ -73,16 +73,16 @@ O schema cria:
 - `billing_events` para processar webhooks de pagamento no backend
 - trigger de criacao de perfil/assinatura no cadastro
 - RLS para isolamento por usuario e administradores
-- limite de 3 usos gratis no banco
+- periodo gratuito de 3 dias aplicado no banco
 - uso ilimitado para assinaturas mensais e anuais ativas
 - grants explicitos para a Data API do Supabase
 - funcoes internas no schema privado, fora da API publica
 
 ## Planos
 
-Por padrao, novos usuarios entram no plano `gratis` com 3 usos totais salvos na nuvem. A conta administradora pode alterar plano, status, validade e limite em `/admin`.
+Por padrao, novos usuarios entram no plano `gratis` com uso ilimitado por 3 dias. A conta administradora pode alterar plano, status, validade e limite em `/admin`.
 
-- `gratis`: R$ 0, 3 usos totais.
+- `gratis`: R$ 0, uso ilimitado por 3 dias.
 - `pro`: R$ 49,90/mes, uso ilimitado enquanto a assinatura mensal estiver ativa.
 - `business`: R$ 149,90/ano, uso ilimitado enquanto a assinatura anual estiver ativa.
 
@@ -166,7 +166,7 @@ Pontos criticos antes de publicar:
 
 - Remover artefatos locais grandes do pacote de deploy, como `.env.local.zip` e `node_modules.zip`.
 - Configurar dominio, Site URL do Supabase, secrets da Edge Function e produto/planos Perfect Pay.
-- Testar Perfect Pay com compra aprovada, duplicidade, status autorizado, reembolso/chargeback, comprador sem conta e limite gratuito de 3 usos.
+- Testar Perfect Pay com compra aprovada, duplicidade, status autorizado, reembolso/chargeback, comprador sem conta e vencimento do periodo gratuito de 3 dias.
 
 ## Scripts
 

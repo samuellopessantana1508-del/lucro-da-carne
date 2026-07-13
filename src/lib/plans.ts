@@ -20,10 +20,10 @@ export const PLAN_LABELS: Record<SubscriptionPlan, string> = {
 
 export const PLAN_DISPLAY_ORDER: SubscriptionPlan[] = ["gratis", "pro", "business"];
 
-export const FREE_USAGE_LIMIT = 3;
+export const FREE_TRIAL_DAYS = 3;
 
 export const PLAN_DEFAULT_LIMITS: Record<SubscriptionPlan, number> = {
-  gratis: FREE_USAGE_LIMIT,
+  gratis: 9999,
   pro: 9999,
   business: 9999,
 };
@@ -33,14 +33,14 @@ export const APP_PLANS: AppPlan[] = [
     id: "gratis",
     name: PLAN_LABELS.gratis,
     price: "R$ 0",
-    cadence: "3 usos totais",
-    lotLimit: `${FREE_USAGE_LIMIT} usos gratis`,
+    cadence: `${FREE_TRIAL_DAYS} dias gratis`,
+    lotLimit: `Uso ilimitado por ${FREE_TRIAL_DAYS} dias`,
     description: "Para validar a calculadora antes de assinar.",
     features: [
-      `${FREE_USAGE_LIMIT} calculos salvos na nuvem`,
+      `Calculos ilimitados por ${FREE_TRIAL_DAYS} dias`,
       "Calculo de rendimento, quebra e lucro",
       "Relatorio copiavel e PDF",
-      "Depois dos 3 usos, upgrade para continuar salvando",
+      "Depois dos 3 dias, assine para continuar usando",
     ],
   },
   {

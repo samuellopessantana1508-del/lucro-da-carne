@@ -11,7 +11,7 @@ import { useLotsStore } from "@/hooks/useLots";
 import { getLots } from "@/lib/storage";
 import { getSupabaseBrowserClient } from "@/lib/supabase";
 import { formatDateBR } from "@/lib/format";
-import { FREE_USAGE_LIMIT } from "@/lib/plans";
+import { FREE_TRIAL_DAYS } from "@/lib/plans";
 import { Cloud, CreditCard, Database, KeyRound, LifeBuoy, LogIn, Save, Upload, User, WifiOff } from "lucide-react";
 
 export default function ContaPage() {
@@ -36,13 +36,9 @@ export default function ContaPage() {
     if (!loaded || loadedFor !== userId) void loadLots(userId);
   }, [loaded, loadedFor, loadLots, userId]);
 
-  const lotLimit = subscription?.lots_limit ?? 0;
-  const freeUsesConsumed = subscription?.free_uses_consumed ?? Math.min(lots.length, FREE_USAGE_LIMIT);
-  const freeUsesRemaining = Math.max(0, FREE_USAGE_LIMIT - freeUsesConsumed);
-  const usageLabel =
-    subscription?.plan === "gratis"
-      ? `${freeUsesRemaining} de ${FREE_USAGE_LIMIT} restantes`
-      : "Ilimitado";
+  const usageLabel = subscription?.plan === "gratis"
+    ? `${FREE_TRIAL_DAYS} dias gratis`
+    : "Ilimitado";
   const validityLabel = useMemo(() => {
     if (!subscription) return "-";
     if (subscription.expires_at) return formatDateBR(subscription.expires_at.slice(0, 10));
@@ -216,7 +212,9 @@ export default function ContaPage() {
                     </p>
                     <p>
                       <span className="block text-xs font-semibold uppercase text-[#8A8178]">Limite</span>
-                      {lotLimit >= 9999 ? "Uso ilimitado" : `${FREE_USAGE_LIMIT} usos totais`}
+                      {subscription?.plan === "gratis"
+                        ? `Uso ilimitado por ${FREE_TRIAL_DAYS} dias`
+                        : "Uso ilimitado"}
                     </p>
                   </div>
                 </div>
@@ -279,7 +277,7 @@ export default function ContaPage() {
                   <KeyRound className="w-4 h-4" />
                   Redefinir senha
                 </button>
-                <a href="mailto:suporte@lucrodacarne.com" className="btn-secondary justify-center">
+                <a href="mailto:suporte@lucrodacarne.com.br" className="btn-secondary justify-center">
                   <LifeBuoy className="w-4 h-4" />
                   Suporte
                 </a>

@@ -94,8 +94,12 @@ const billingMigration = await readFile(
   new URL("../supabase/migrations/20260711140000_add_perfectpay_billing_and_free_usage.sql", import.meta.url),
   "utf8"
 );
-const freeLimitMigration = await readFile(
-  new URL("../supabase/migrations/20260712102000_reinstate_three_use_free_limit.sql", import.meta.url),
+const freeTrialMigration = await readFile(
+  new URL("../supabase/migrations/20260713132855_make_free_plan_three_day_trial.sql", import.meta.url),
+  "utf8"
+);
+const legacyFreeLimitCleanupMigration = await readFile(
+  new URL("../supabase/migrations/20260713133433_remove_legacy_free_plan_limit_trigger.sql", import.meta.url),
   "utf8"
 );
 const schemaMigration = await readFile(
@@ -133,7 +137,12 @@ recordScenario(
   payloads.get("authorized-only.json").sale_status_enum === 8 &&
     edgeFunctionSource.includes('access: saleStatus === authorizedStatus ? "authorized_only"')
 );
-recordScenario("11 cancellation revokes access", payloads.get("cancelled.json").sale_status_enum === 6);
+recordScenario(
+  "11 cancellation revokes access",
+  payloads.get("cancelled.json").sale_status_enum === 6 &&
+    edgeFunctionSource.includes('status: "expired"') &&
+    edgeFunctionSource.includes("expires_at: now")
+);
 recordScenario("12 refund revokes access", payloads.get("refunded.json").sale_status_enum === 7);
 recordScenario("13 chargeback revokes access", payloads.get("charged-back.json").sale_status_enum === 9);
 recordScenario(
@@ -161,19 +170,25 @@ recordScenario(
     schemaMigration.includes("UNIQUE (provider, provider_event_id)")
 );
 recordScenario(
-  "19 fourth free use is blocked transactionally",
-  freeLimitMigration.includes("FOR UPDATE") &&
-    freeLimitMigration.includes("free_uses_consumed < 3") &&
-    freeLimitMigration.includes("free_usage_limit_reached")
+  "19 free trial expires after three days",
+  freeTrialMigration.includes("trial_started_at + interval '3 days'") &&
+    freeTrialMigration.includes("s.expires_at IS NOT NULL AND s.expires_at > now()") &&
+    freeTrialMigration.includes("subscription_access_expired")
 );
 recordScenario(
-  "20 frontend cannot alter subscription",
+  "20 legacy free-use trigger is removed",
+  legacyFreeLimitCleanupMigration.includes("DROP TRIGGER IF EXISTS enforce_free_plan_limit_trigger") &&
+    legacyFreeLimitCleanupMigration.includes("DROP FUNCTION IF EXISTS public.enforce_free_plan_limit") &&
+    legacyFreeLimitCleanupMigration.includes("lots_limit = 9999")
+);
+recordScenario(
+  "21 frontend cannot alter subscription",
   schemaMigration.includes("subscriptions_select_own") &&
     !schemaMigration.includes("subscriptions_update_own")
 );
 
-if (scenarios.length !== 20) {
-  console.error(`Expected 20 integration scenarios, found ${scenarios.length}`);
+if (scenarios.length !== 21) {
+  console.error(`Expected 21 integration scenarios, found ${scenarios.length}`);
   failures += 1;
 }
 

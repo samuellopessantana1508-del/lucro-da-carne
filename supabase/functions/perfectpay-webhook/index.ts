@@ -327,15 +327,16 @@ Deno.serve(async (request) => {
     const now = new Date().toISOString();
     const revokePayload = {
       plan: "gratis",
-      status: "active",
-      lots_limit: 3,
+      status: "expired",
+      lots_limit: 9999,
       provider: "perfectpay",
       provider_subscription_id: saleCode,
       sale_code: saleCode,
       billing_cycle: "free",
       current_period_end: now,
-      expires_at: null,
+      expires_at: now,
       cancelled_at: now,
+      free_uses_consumed: 0,
     };
 
     let revokedUserId: string | null = null;
