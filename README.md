@@ -175,8 +175,15 @@ npm run dev
 npm run lint
 npm run typecheck
 npm run test:perfectpay
+npm run test:launch
 npm run build
 npm run start
+```
+
+No plano Supabase Free, execute o backup externo seguindo [`docs/FREE_PLAN_BACKUP.md`](docs/FREE_PLAN_BACKUP.md):
+
+```powershell
+.\scripts\backup-supabase.cmd
 ```
 
 ## Estrutura principal

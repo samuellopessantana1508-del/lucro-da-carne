@@ -41,6 +41,7 @@ yarn-error.log*
 *.7z
 *.rar
 /supabase/.temp/
+/.backups/
 
 # vercel
 .vercel

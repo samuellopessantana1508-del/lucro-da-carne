@@ -31,16 +31,18 @@
 - Politica de Cancelamento e Reembolso publicada e vinculada no rodape, nos Termos, nos planos e na conta.
 - Cabecalhos HTTP de seguranca, sitemap, robots e monitor de producao a cada 6 horas adicionados.
 - `.env.local.example`, README e fixtures de teste Perfect Pay atualizados.
+- Caixa `suporte@lucrodacarne.com.br`, SMTP proprio e templates de Auth ativados e validados de ponta a ponta.
+- Rotina de backup logico externo adicionada para a operacao deliberada no Supabase Free.
 
 ## O que ainda falta para SaaS vendavel
 
-As migrations, a Edge Function, o dominio, o SSL, o deploy automatico e as variaveis publicas do Supabase ja estao ativos em producao. Os dois checkouts recorrentes foram validados e publicados na Hostinger.
+As migrations, a Edge Function, o dominio, o SSL, o deploy automatico, o SMTP proprio e as variaveis publicas do Supabase ja estao ativos em producao. Os dois checkouts recorrentes foram validados e publicados na Hostinger.
 
-1. Criar `suporte@lucrodacarne.com.br`, configurar SMTP do Supabase e aplicar o template `supabase/templates/invite.html`.
-2. Executar uma compra real mensal e uma anual, validar o convite/liberacao e depois testar cancelamento ou reembolso.
-3. Completar os documentos legais com razao social ou nome do responsavel, CPF/CNPJ e endereco.
-4. Ativar a protecao contra senhas vazadas no Supabase Auth com uma conta administrativa do projeto.
-5. Migrar o Supabase do plano Free para Pro antes de operar vendas para ter backups diarios restauraveis e suporte de producao.
+1. Executar uma compra real mensal e uma anual, validar o convite/liberacao e depois testar cancelamento ou reembolso.
+2. Completar os documentos legais com razao social ou nome do responsavel, CPF/CNPJ e endereco.
+3. Instalar o Docker Desktop, executar o primeiro backup com `scripts/backup-supabase.cmd` e guardar a copia fora deste computador.
+
+O Supabase permanece no plano Free por decisao do proprietario. A protecao contra senhas vazadas e o download dos backups gerenciados nao estao disponiveis nesse plano; senha minima de 8 caracteres e backup logico externo sao as medidas compensatorias adotadas.
 
 ## Variaveis de producao
 

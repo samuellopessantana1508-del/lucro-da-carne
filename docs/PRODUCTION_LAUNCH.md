@@ -57,10 +57,18 @@ Depois de aplicar cada variavel, aguarde a reimplantacao automatica e confirme o
 
 1. No Supabase Auth > URL Configuration, defina Site URL como `https://lucrodacarne.com.br`.
 2. Adicione `https://lucrodacarne.com.br/definir-senha` nas Redirect URLs.
-3. Configure SMTP proprio com remetente do dominio.
-4. No template Invite, use o assunto `Sua compra do Lucro da Carne foi aprovada`.
-5. Cole o conteudo de `supabase/templates/invite.html` no template de convite.
-6. Ative protecao contra senhas vazadas em Auth > Password Security.
+3. SMTP proprio ativo com `suporte@lucrodacarne.com.br` pela Hostinger.
+4. Templates de convite, confirmacao e recuperacao publicados a partir de `supabase/templates/`.
+5. Envio do Supabase Auth validado de ponta a ponta em 14/07/2026.
+6. Senha minima do Auth configurada em 8 caracteres.
+7. A protecao contra senhas vazadas nao esta disponivel no plano Free e permanece desativada por limitacao do plano.
+
+## Continuidade no plano Free
+
+- O projeto permanece no Supabase Free por decisao do proprietario.
+- Backups gerenciados nao podem ser baixados nesse plano.
+- Use `scripts/backup-supabase.cmd` conforme `docs/FREE_PLAN_BACKUP.md` e mantenha uma copia criptografada fora deste computador.
+- Projetos Free podem ser pausados por inatividade; o monitor de producao nao substitui um plano de recuperacao.
 
 ## Homologacao
 
@@ -79,6 +87,5 @@ Depois de aplicar cada variavel, aguarde a reimplantacao automatica e confirme o
 
 - Fazer uma compra real de baixo valor em cada plano e depois estornar.
 - Revisar Termos de Uso, Privacidade e Cancelamento com os dados juridicos do controlador.
-- Criar `suporte@lucrodacarne.com.br` e validar recebimento.
-- Migrar o projeto Supabase do plano Free para Pro para disponibilizar backups diarios restauraveis.
-- Ativar a protecao contra senhas vazadas com uma conta administrativa do projeto.
+- Executar o primeiro backup externo depois de obter a senha do banco e instalar o Docker Desktop.
+- Guardar a connection string e os backups fora do repositorio.
