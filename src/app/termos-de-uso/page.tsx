@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import LegalDocument from "@/components/LegalDocument";
+import { LEGAL_IDENTITY } from "@/lib/legal-identity";
 
 export const metadata: Metadata = {
   title: "Termos de Uso",
@@ -32,6 +33,11 @@ export default function TermosDeUsoPage() {
     >
       <section id="aceitacao">
         <h2>1. Aceitação dos Termos</h2>
+        <p>
+          Estes Termos são celebrados com {LEGAL_IDENTITY.businessName}, inscrita no CNPJ sob o nº{" "}
+          {LEGAL_IDENTITY.cnpj}, com sede em {LEGAL_IDENTITY.formattedAddress}, responsável pela
+          plataforma Lucro da Carne.
+        </p>
         <p>
           Ao criar uma conta, iniciar o período gratuito, contratar um plano ou utilizar a plataforma
           Lucro da Carne, você declara que leu e concorda com estes Termos e com a Política de

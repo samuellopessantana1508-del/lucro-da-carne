@@ -52,6 +52,14 @@ const checks = [
       read("src/app/cancelamento-e-reembolso/page.tsx").includes("R$ 149,90"),
   ],
   [
+    "legal documents identify the supplier and data controller",
+    read("src/lib/legal-identity.ts").includes("60.144.937/0001-62") &&
+      read("src/lib/legal-identity.ts").includes("75910-426") &&
+      read("src/app/termos-de-uso/page.tsx").includes("LEGAL_IDENTITY") &&
+      read("src/app/politica-de-privacidade/page.tsx").includes("LEGAL_IDENTITY") &&
+      read("src/app/cancelamento-e-reembolso/page.tsx").includes("LEGAL_IDENTITY"),
+  ],
+  [
     "customer-facing plans page does not expose webhook implementation",
     !read("src/app/planos/page.tsx").toLowerCase().includes("webhook"),
   ],

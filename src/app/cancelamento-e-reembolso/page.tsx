@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import LegalDocument from "@/components/LegalDocument";
+import { LEGAL_IDENTITY } from "@/lib/legal-identity";
 
 export const metadata: Metadata = {
   title: "Cancelamento e Reembolso",
@@ -28,6 +29,10 @@ export default function CancelamentoEReembolsoPage() {
     >
       <section id="planos">
         <h2>1. Planos e renovacao</h2>
+        <p>
+          A plataforma Lucro da Carne é fornecida por {LEGAL_IDENTITY.businessName}, CNPJ{" "}
+          {LEGAL_IDENTITY.cnpj}, com sede em {LEGAL_IDENTITY.formattedAddress}.
+        </p>
         <p>
           Novas contas podem usar o Lucro da Carne gratuitamente por 3 dias, sem limite de calculos.
           Depois desse periodo, o acesso depende de uma assinatura ativa.

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import LegalDocument from "@/components/LegalDocument";
+import { LEGAL_IDENTITY } from "@/lib/legal-identity";
 
 export const metadata: Metadata = {
   title: "Política de Privacidade",
@@ -32,9 +33,10 @@ export default function PoliticaDePrivacidadePage() {
       <section id="controlador">
         <h2>1. Controlador e contato</h2>
         <p>
-          O responsável pela operação da plataforma Lucro da Carne atua como controlador dos dados
-          pessoais tratados para cadastro, acesso, suporte e administração do serviço. O canal para
-          assuntos de privacidade é <a href="mailto:suporte@lucrodacarne.com.br">suporte@lucrodacarne.com.br</a>.
+          {LEGAL_IDENTITY.businessName}, inscrita no CNPJ sob o nº {LEGAL_IDENTITY.cnpj}, com sede em{" "}
+          {LEGAL_IDENTITY.formattedAddress}, é a controladora dos dados pessoais tratados pela
+          plataforma Lucro da Carne. O canal para assuntos de privacidade é{" "}
+          <a href={`mailto:${LEGAL_IDENTITY.email}`}>{LEGAL_IDENTITY.email}</a>.
         </p>
       </section>
 

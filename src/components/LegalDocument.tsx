@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft, CalendarDays, Mail } from "lucide-react";
 import Header from "@/components/Header";
+import { LEGAL_IDENTITY } from "@/lib/legal-identity";
 
 type LegalSection = {
   id: string;
@@ -75,12 +76,19 @@ export default function LegalDocument({
               Dúvidas, solicitações de privacidade e assuntos relacionados a estes documentos podem ser
               enviados ao canal abaixo.
             </p>
+            <address className="mt-4 text-sm not-italic leading-6 text-[#625B55]">
+              <strong className="text-[#4A0F14]">{LEGAL_IDENTITY.businessName}</strong>
+              <br />
+              CNPJ {LEGAL_IDENTITY.cnpj}
+              <br />
+              {LEGAL_IDENTITY.formattedAddress}
+            </address>
             <a
-              href="mailto:suporte@lucrodacarne.com.br"
+              href={`mailto:${LEGAL_IDENTITY.email}`}
               className="mt-4 inline-flex items-center gap-2 font-semibold text-[#7A1E24] hover:text-[#4A0F14]"
             >
               <Mail className="h-4 w-4" />
-              suporte@lucrodacarne.com.br
+              {LEGAL_IDENTITY.email}
             </a>
           </section>
         </div>

@@ -11,6 +11,7 @@
 - Anual: R$ 149,90 por ano, uso ilimitado enquanto vigente.
 - Autoexclusao: `account-self-service` ativa, autenticada por JWT e bloqueada para assinatura paga vigente.
 - Monitor: GitHub Actions verifica o dominio, paginas legais, cabecalhos e protecao da funcao a cada 6 horas.
+- Documentos legais: fornecedor e controlador identificados como `60.144.937 SAMUEL LOPES SANTANA`, CNPJ `60.144.937/0001-62`.
 
 ## Perfect Pay
 
@@ -86,6 +87,5 @@ Depois de aplicar cada variavel, aguarde a reimplantacao automatica e confirme o
 ## Antes da primeira venda
 
 - Fazer uma compra real de baixo valor em cada plano e depois estornar.
-- Revisar Termos de Uso, Privacidade e Cancelamento com os dados juridicos do controlador.
 - Executar o primeiro backup externo depois de obter a senha do banco e instalar o Docker Desktop.
 - Guardar a connection string e os backups fora do repositorio.
