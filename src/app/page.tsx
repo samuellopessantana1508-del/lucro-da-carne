@@ -163,15 +163,6 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-
-        {/* Footer */}
-        <footer className="py-8 border-t border-[#E5DED3]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
-            <p className="text-sm text-[#8A8178]">
-              Lucro da Carne · Calculadora de rendimento, quebra e lucro para açougues.
-            </p>
-          </div>
-        </footer>
       </main>
     </>
   );

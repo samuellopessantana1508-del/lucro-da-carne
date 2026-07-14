@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import AppProviders from "@/components/AppProviders";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import SiteFooter from "@/components/SiteFooter";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -54,7 +55,12 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col">
         <ErrorBoundary>
-          <AppProviders>{children}</AppProviders>
+          <AppProviders>
+            <div className="flex min-h-screen flex-col">
+              {children}
+              <SiteFooter />
+            </div>
+          </AppProviders>
         </ErrorBoundary>
       </body>
     </html>

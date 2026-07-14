@@ -12,10 +12,10 @@
 
 ## Perfect Pay
 
-1. Crie um produto no formato Assinatura chamado Lucro da Carne.
-2. Crie o plano mensal recorrente por R$ 49,90.
-3. Crie o plano anual recorrente por R$ 149,90.
-4. Copie o codigo do produto, os dois codigos de plano e os dois links de checkout.
+1. Produto `PPPBF498` criado no formato Assinatura como Lucro da Carne.
+2. Plano mensal recorrente: `PPLQQPVN7`, R$ 49,90, checkout `https://go.perfectpay.com.br/PPU38CQE6NA`.
+3. Plano anual recorrente: `PPLQQPVIL`, R$ 149,90, checkout `https://go.perfectpay.com.br/PPU38CQE4L9`.
+4. Nao use `https://go.perfectpay.com.br/PPU38CQE4L8`: esse checkout esta vinculado ao plano antigo avulso `PPLQQPVBO`.
 5. Em Ferramentas > Webhook - Vendas, adicione:
 
 ```text
@@ -42,14 +42,14 @@ APP_URL=https://lucrodacarne.com.br
 
 ## Variaveis da Hostinger
 
-As variaveis publicas do Supabase ja estao configuradas. Ainda faltam os links criados na Perfect Pay:
+As variaveis publicas do Supabase ja estao configuradas. Use somente os checkouts recorrentes validados abaixo:
 
 ```text
-NEXT_PUBLIC_PERFECTPAY_MONTHLY_CHECKOUT_URL=
-NEXT_PUBLIC_PERFECTPAY_ANNUAL_CHECKOUT_URL=
+NEXT_PUBLIC_PERFECTPAY_MONTHLY_CHECKOUT_URL=https://go.perfectpay.com.br/PPU38CQE6NA
+NEXT_PUBLIC_PERFECTPAY_ANNUAL_CHECKOUT_URL=https://go.perfectpay.com.br/PPU38CQE4L9
 ```
 
-Depois de aplicar as duas variaveis, aguarde a reimplantacao automatica e confirme que os botoes em `/planos` deixam de mostrar `Checkout pendente`.
+Depois de aplicar cada variavel, aguarde a reimplantacao automatica e confirme o codigo do plano no checkout antes de liberar o botao em `/planos`.
 
 ## Auth e e-mail
 
@@ -76,6 +76,6 @@ Depois de aplicar as duas variaveis, aguarde a reimplantacao automatica e confir
 ## Antes da primeira venda
 
 - Fazer uma compra real de baixo valor em cada plano e depois estornar.
-- Publicar Termos de Uso, Privacidade/LGPD e Politica de Reembolso.
+- Revisar Termos de Uso e Privacidade com os dados juridicos do controlador e definir a politica comercial de reembolso.
 - Criar `suporte@lucrodacarne.com.br` e validar recebimento.
 - Ativar backups, alertas de webhook e monitoramento de erros.

@@ -22,19 +22,19 @@
 - Conta mostra validade do periodo gratis, ciclo de cobranca e acoes de senha/suporte.
 - Admin ganhou busca por e-mail/plano/status/codigo de venda e historico resumido de eventos sem payload bruto.
 - Criada rota `/definir-senha` para convites e reset de senha.
+- Termos de Uso e Politica de Privacidade publicados no aplicativo e vinculados no rodape global.
+- Payload de auditoria da Perfect Pay reduzido para nao persistir token do webhook nem CPF do comprador.
 - `.env.local.example`, README e fixtures de teste Perfect Pay atualizados.
 
 ## O que ainda falta para SaaS vendavel
 
-As migrations, a Edge Function, o dominio, o SSL, o deploy automatico e as variaveis publicas do Supabase ja estao ativos em producao.
+As migrations, a Edge Function, o dominio, o SSL, o deploy automatico e as variaveis publicas do Supabase ja estao ativos em producao. Os dois checkouts recorrentes foram validados e publicados na Hostinger.
 
-1. Criar produto/planos na Perfect Pay e preencher os codigos reais nas secrets.
-2. Publicar checkout mensal/anual e preencher os links publicos `NEXT_PUBLIC_PERFECTPAY_*`.
-3. Configurar Site URL e Redirect URLs do Supabase, incluindo `/definir-senha`.
-4. Configurar SMTP do Supabase e aplicar o template `supabase/templates/invite.html`.
-5. Executar a homologacao de compra, duplicidade, revogacao, convite e renovacao.
-6. Adicionar termos, privacidade, LGPD, politica de reembolso, suporte e rotina de exclusao/exportacao de dados.
-7. Configurar monitoramento, backups Supabase e alertas de webhook.
+1. Configurar SMTP do Supabase e aplicar o template `supabase/templates/invite.html`.
+2. Executar a homologacao de compra, duplicidade, revogacao, convite e renovacao.
+3. Completar os documentos legais com razao social ou nome do responsavel, CPF/CNPJ, endereco e politica comercial de reembolso.
+4. Implementar uma rotina operacional de exportacao e exclusao de dados.
+5. Configurar monitoramento, backups Supabase e alertas de webhook.
 
 ## Variaveis de producao
 

@@ -146,3 +146,52 @@ input[type="number"] {
   border-color: #7A1E24;
   box-shadow: 0 0 0 3px rgba(122, 30, 36, 0.1);
 }
+
+.legal-copy section {
+  scroll-margin-top: 96px;
+}
+
+.legal-copy section + section {
+  margin-top: 40px;
+  padding-top: 40px;
+  border-top: 1px solid #E5DED3;
+}
+
+.legal-copy h2 {
+  color: #4A0F14;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.legal-copy p,
+.legal-copy li {
+  color: #625B55;
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.legal-copy p,
+.legal-copy ul {
+  margin-top: 14px;
+}
+
+.legal-copy ul {
+  list-style: disc;
+  padding-left: 22px;
+}
+
+.legal-copy li + li {
+  margin-top: 8px;
+}
+
+.legal-copy a {
+  color: #7A1E24;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.legal-copy strong {
+  color: #4A0F14;
+}

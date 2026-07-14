@@ -158,6 +158,30 @@ function envValue(name: string) {
   return Deno.env.get(name)?.trim() ?? "";
 }
 
+function auditPayload(payload: PerfectPayPayload): JsonObject {
+  return {
+    code: asString(payload.code),
+    sale_amount: asNumber(payload.sale_amount),
+    sale_status_enum: asNumber(payload.sale_status_enum),
+    sale_status_detail: asString(payload.sale_status_detail),
+    date_created: asString(payload.date_created),
+    date_approved: asString(payload.date_approved),
+    product: {
+      code: asString(payload.product?.code),
+      name: asString(payload.product?.name),
+      external_reference: asString(payload.product?.external_reference),
+    },
+    plan: {
+      code: asString(payload.plan?.code),
+      name: asString(payload.plan?.name),
+    },
+    customer: {
+      full_name: asString(payload.customer?.full_name),
+      email: normalizeEmail(payload.customer?.email),
+    },
+  };
+}
+
 function resolvePlan(payload: PerfectPayPayload): { plan?: ResolvedPlan; error?: string } {
   const monthlyCode = envValue("PERFECTPAY_MONTHLY_PLAN_CODE");
   const annualCode = envValue("PERFECTPAY_ANNUAL_PLAN_CODE");
@@ -244,7 +268,7 @@ Deno.serve(async (request) => {
     provider: "perfectpay",
     provider_event_id: eventId,
     event_type: eventType,
-    payload,
+    payload: auditPayload(payload),
     status: "received",
     error_message: null,
     processed_at: null,

@@ -90,6 +90,10 @@ const edgeFunctionSource = await readFile(
   new URL("../supabase/functions/perfectpay-webhook/index.ts", import.meta.url),
   "utf8"
 );
+const auditPayloadSource = edgeFunctionSource.slice(
+  edgeFunctionSource.indexOf("function auditPayload"),
+  edgeFunctionSource.indexOf("function resolvePlan")
+);
 const billingMigration = await readFile(
   new URL("../supabase/migrations/20260711140000_add_perfectpay_billing_and_free_usage.sql", import.meta.url),
   "utf8"
@@ -186,9 +190,16 @@ recordScenario(
   schemaMigration.includes("subscriptions_select_own") &&
     !schemaMigration.includes("subscriptions_update_own")
 );
+recordScenario(
+  "22 billing audit redacts token and document",
+  edgeFunctionSource.includes("payload: auditPayload(payload)") &&
+    auditPayloadSource.includes("function auditPayload") &&
+    !auditPayloadSource.includes("identification_number") &&
+    !auditPayloadSource.includes("token")
+);
 
-if (scenarios.length !== 21) {
-  console.error(`Expected 21 integration scenarios, found ${scenarios.length}`);
+if (scenarios.length !== 22) {
+  console.error(`Expected 22 integration scenarios, found ${scenarios.length}`);
   failures += 1;
 }
 
