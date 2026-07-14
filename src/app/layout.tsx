@@ -5,6 +5,7 @@ import SiteFooter from "@/components/SiteFooter";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://lucrodacarne.com.br"),
   title: {
     default: "Lucro da Carne | Calculadora de rendimento para açougues",
     template: "%s | Lucro da Carne",

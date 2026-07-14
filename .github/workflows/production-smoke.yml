@@ -1,0 +1,43 @@
+name: Production smoke check
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 */6 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  verify-production:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check public pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          for path in / /planos /termos-de-uso /politica-de-privacidade /cancelamento-e-reembolso /robots.txt /sitemap.xml; do
+            curl --fail --silent --show-error --location --retry 2 "https://lucrodacarne.com.br${path}" > /dev/null
+          done
+
+      - name: Check security headers
+        shell: bash
+        run: |
+          set -euo pipefail
+          headers="$(curl --fail --silent --show-error --head --location https://lucrodacarne.com.br/)"
+          grep -qi '^strict-transport-security:' <<< "$headers"
+          grep -qi '^x-content-type-options: nosniff' <<< "$headers"
+          grep -qi '^x-frame-options: DENY' <<< "$headers"
+          if grep -qi '^x-powered-by:' <<< "$headers"; then
+            echo "The production response exposes X-Powered-By."
+            exit 1
+          fi
+
+      - name: Check protected account endpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          status="$(curl --silent --output /dev/null --write-out '%{http_code}' --request DELETE \
+            https://arosnbldkgvbqhwnwfcr.supabase.co/functions/v1/account-self-service)"
+          test "$status" = "401"

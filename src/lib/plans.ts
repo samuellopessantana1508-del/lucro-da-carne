@@ -14,8 +14,8 @@ export type AppPlan = {
 
 export const PLAN_LABELS: Record<SubscriptionPlan, string> = {
   gratis: "Gratuito",
-  pro: "Pro",
-  business: "Business",
+  pro: "Mensal",
+  business: "Anual",
 };
 
 export const PLAN_DISPLAY_ORDER: SubscriptionPlan[] = ["gratis", "pro", "business"];
@@ -50,12 +50,12 @@ export const APP_PLANS: AppPlan[] = [
     cadence: "/mes",
     badge: "Mais indicado",
     lotLimit: "Uso ilimitado",
-    description: "Para acougues e casas de carne que acompanham fornecedores e margem toda semana.",
+    description: "Acesso completo com renovacao mensal.",
     features: [
       "Lotes e calculos ilimitados",
       "Dashboard por lote e fornecedor",
       "PDFs para conferencia interna",
-      "Acesso liberado por compra Perfect Pay",
+      "Historico seguro na nuvem",
     ],
     checkoutUrl:
       process.env.NEXT_PUBLIC_PERFECTPAY_MONTHLY_CHECKOUT_URL ||
@@ -67,12 +67,12 @@ export const APP_PLANS: AppPlan[] = [
     price: "R$ 149,90",
     cadence: "/ano",
     lotLimit: "Uso ilimitado",
-    description: "Para equipes, varios pontos de venda ou operacoes com maior volume de lotes.",
+    description: "O mesmo acesso completo com maior economia no ano.",
     features: [
       "Lotes e calculos ilimitados",
-      "Gestao manual pelo painel admin",
-      "Acompanhamento de clientes e planos",
-      "Preparado para suporte comercial",
+      "Dashboard por lote e fornecedor",
+      "PDFs para conferencia interna",
+      "Historico seguro na nuvem",
     ],
     checkoutUrl:
       process.env.NEXT_PUBLIC_PERFECTPAY_ANNUAL_CHECKOUT_URL ||
@@ -82,4 +82,22 @@ export const APP_PLANS: AppPlan[] = [
 
 export function getPlanLabel(plan?: SubscriptionPlan | null): string {
   return plan ? PLAN_LABELS[plan] : PLAN_LABELS.gratis;
+}
+
+export function hasSubscriptionAccess(
+  subscription?: {
+    plan: SubscriptionPlan;
+    status: string;
+    expires_at: string | null;
+  } | null,
+  now = Date.now()
+): boolean {
+  if (!subscription || subscription.status !== "active") return false;
+
+  const expiresAt = subscription.expires_at
+    ? new Date(subscription.expires_at).getTime()
+    : null;
+  if (expiresAt !== null && (!Number.isFinite(expiresAt) || expiresAt <= now)) return false;
+
+  return subscription.plan === "gratis" ? expiresAt !== null : true;
 }

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import LegalDocument from "@/components/LegalDocument";
 
 export const metadata: Metadata = {
@@ -72,7 +73,7 @@ export default function TermosDeUsoPage() {
         <h2>4. Período gratuito, planos e cobrança</h2>
         <p>
           Novas contas recebem uso gratuito e ilimitado por 3 dias contados da criação da conta. Depois
-          desse prazo, é necessário manter uma assinatura ativa para criar novos registros na nuvem.
+          desse prazo, é necessário manter uma assinatura ativa para continuar usando a plataforma.
         </p>
         <ul>
           <li>Plano mensal: R$ 49,90 por mes, com uso ilimitado enquanto estiver ativo.</li>
@@ -84,6 +85,10 @@ export default function TermosDeUsoPage() {
           confirmação. Cancelamento, reembolso ou chargeback podem encerrar o acesso pago sem apagar os
           registros existentes. Direitos obrigatórios previstos na legislação de consumo permanecem
           preservados, inclusive o direito de arrependimento quando aplicável à contratação.
+        </p>
+        <p>
+          As regras operacionais e os canais de solicitação estão descritos na{" "}
+          <Link href="/cancelamento-e-reembolso">Política de Cancelamento e Reembolso</Link>.
         </p>
       </section>
 

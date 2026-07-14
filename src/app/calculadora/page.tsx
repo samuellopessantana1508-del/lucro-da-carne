@@ -2,16 +2,20 @@
 
 import { useState, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import Header from "@/components/Header";
+import AuthModal from "@/components/AuthModal";
 import MetricCard from "@/components/MetricCard";
 import AlertBox from "@/components/AlertBox";
 import RecommendationBox from "@/components/RecommendationBox";
+import { useAuth } from "@/hooks/useAuth";
 import { calculateLot } from "@/lib/calculations";
 import { formatCurrency, formatWeight, formatPercent, todayISO } from "@/lib/format";
 import { generateReport } from "@/lib/report";
 import { generatePDF } from "@/lib/report-pdf";
 import { generateId } from "@/lib/storage";
 import { useLotsStore } from "@/hooks/useLots";
+import { FREE_TRIAL_DAYS, hasSubscriptionAccess } from "@/lib/plans";
 import {
   LOT_TYPE_LABELS,
   CUT_CATEGORY_LABELS,
@@ -41,6 +45,8 @@ import {
   ChevronDown,
   ChevronUp,
   Sparkles,
+  Clock3,
+  LogIn,
 } from "lucide-react";
 
 export default function CalculadoraPage() {
@@ -83,6 +89,7 @@ function CalculadoraContent() {
   const searchParams = useSearchParams();
   const startsWithExample = searchParams.get("exemplo") === "1";
   const addLot = useLotsStore((s) => s.addLot);
+  const { configured, loading, user, subscription } = useAuth();
 
   const [name, setName] = useState(() => (startsWithExample ? EXAMPLE_LOT.name : ""));
   const [type, setType] = useState<LotType>(() =>
@@ -111,6 +118,7 @@ function CalculadoraContent() {
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [costMode, setCostMode] = useState<"perkg" | "total">("perkg");
+  const [authOpen, setAuthOpen] = useState(false);
 
   const loadExample = useCallback(() => {
     setName(EXAMPLE_LOT.name);
@@ -272,6 +280,65 @@ function CalculadoraContent() {
 
   const totalCutsWeight = cuts.reduce((s, c) => s + c.weightKg, 0);
   const canCalculate = inputWeight > 0 && totalCost > 0 && cuts.length > 0 && cuts.some((c) => c.weightKg > 0);
+
+  if (configured && loading) {
+    return (
+      <>
+        <Header />
+        <main className="flex flex-1 items-center justify-center px-4 py-12">
+          <p className="text-sm text-[#8A8178]">Validando seu acesso...</p>
+        </main>
+      </>
+    );
+  }
+
+  if (configured && !user) {
+    return (
+      <>
+        <Header />
+        <main className="mx-auto flex w-full max-w-xl flex-1 items-center px-4 py-10 sm:px-6">
+          <section className="card w-full p-6 sm:p-8">
+            <div className="mb-5 inline-flex rounded-lg bg-[#F7F1E8] p-3 text-[#7A1E24]">
+              <LogIn className="h-6 w-6" />
+            </div>
+            <h1 className="text-2xl font-bold text-[#4A0F14]">Entre para usar a calculadora</h1>
+            <p className="mt-3 text-sm leading-6 text-[#625B55]">
+              Crie sua conta e use todos os calculos sem limite durante {FREE_TRIAL_DAYS} dias.
+              Seus lotes ficam protegidos na sua conta e disponiveis em qualquer dispositivo.
+            </p>
+            <button onClick={() => setAuthOpen(true)} className="btn-primary mt-6 w-full justify-center">
+              <LogIn className="h-4 w-4" />
+              Entrar ou criar conta
+            </button>
+          </section>
+        </main>
+        <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
+      </>
+    );
+  }
+
+  if (configured && !hasSubscriptionAccess(subscription)) {
+    return (
+      <>
+        <Header />
+        <main className="mx-auto flex w-full max-w-xl flex-1 items-center px-4 py-10 sm:px-6">
+          <section className="card w-full p-6 sm:p-8">
+            <div className="mb-5 inline-flex rounded-lg bg-[#FFF8E1] p-3 text-[#8B6914]">
+              <Clock3 className="h-6 w-6" />
+            </div>
+            <h1 className="text-2xl font-bold text-[#4A0F14]">Seu periodo gratuito terminou</h1>
+            <p className="mt-3 text-sm leading-6 text-[#625B55]">
+              Seus dados continuam salvos. Escolha o plano mensal ou anual para voltar a calcular e
+              acessar seus lotes sem limite de uso.
+            </p>
+            <Link href="/planos" className="btn-primary mt-6 w-full justify-center">
+              Ver planos
+            </Link>
+          </section>
+        </main>
+      </>
+    );
+  }
 
   return (
     <>

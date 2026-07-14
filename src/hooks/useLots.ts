@@ -33,6 +33,12 @@ async function getRemoteUserId(): Promise<string | null> {
   return user?.id ?? null;
 }
 
+function requireAuthenticatedCloudUser(userId: string | null): void {
+  if (getSupabaseBrowserClient() && !userId) {
+    throw new Error("Entre na sua conta para usar e salvar a calculadora.");
+  }
+}
+
 export const useLotsStore = create<LotsStore>((set, get) => ({
   lots: [],
   loaded: false,
@@ -41,9 +47,15 @@ export const useLotsStore = create<LotsStore>((set, get) => ({
 
   loadLots: async (userId = null) => {
     try {
-      if (getSupabaseBrowserClient() && userId) {
+      const cloudClient = getSupabaseBrowserClient();
+      if (cloudClient && userId) {
         const lots = await fetchRemoteLots(userId);
         set({ lots, loaded: true, loadedFor: userId, error: null });
+        return;
+      }
+
+      if (cloudClient) {
+        set({ lots: [], loaded: true, loadedFor: null, error: null });
         return;
       }
 
@@ -59,6 +71,7 @@ export const useLotsStore = create<LotsStore>((set, get) => ({
 
   addLot: async (lot) => {
     const userId = await getRemoteUserId();
+    requireAuthenticatedCloudUser(userId);
 
     if (userId) {
       const saved = await insertRemoteLot(lot, userId);
@@ -73,6 +86,7 @@ export const useLotsStore = create<LotsStore>((set, get) => ({
 
   removeLot: async (id) => {
     const userId = await getRemoteUserId();
+    requireAuthenticatedCloudUser(userId);
 
     if (userId) {
       await deleteRemoteLot(id);
@@ -86,6 +100,7 @@ export const useLotsStore = create<LotsStore>((set, get) => ({
 
   editLot: async (id, updates) => {
     const userId = await getRemoteUserId();
+    requireAuthenticatedCloudUser(userId);
 
     if (userId) {
       const updated = await updateRemoteLot(id, updates);
@@ -102,6 +117,7 @@ export const useLotsStore = create<LotsStore>((set, get) => ({
 
   copyLot: async (id) => {
     const userId = await getRemoteUserId();
+    requireAuthenticatedCloudUser(userId);
 
     if (userId) {
       const lot = get().lots.find((item) => item.id === id);
@@ -125,6 +141,7 @@ export const useLotsStore = create<LotsStore>((set, get) => ({
 
   clearAll: async () => {
     const userId = await getRemoteUserId();
+    requireAuthenticatedCloudUser(userId);
 
     if (userId) {
       await clearRemoteLots(userId);

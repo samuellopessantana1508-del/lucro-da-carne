@@ -24,17 +24,23 @@
 - Criada rota `/definir-senha` para convites e reset de senha.
 - Termos de Uso e Politica de Privacidade publicados no aplicativo e vinculados no rodape global.
 - Payload de auditoria da Perfect Pay reduzido para nao persistir token do webhook nem CPF do comprador.
+- Calculadora bloqueada para visitantes e contas com periodo gratuito expirado; o modo local anonimo nao contorna mais a assinatura.
+- Cadastro com aceite expresso dos documentos, senha minima de 8 caracteres e recuperacao de senha.
+- Checkout pago liberado somente depois do login, reduzindo compras sem conta identificada.
+- Autoatendimento com exportacao de dados e exclusao segura de conta; assinaturas pagas ativas bloqueiam a exclusao.
+- Politica de Cancelamento e Reembolso publicada e vinculada no rodape, nos Termos, nos planos e na conta.
+- Cabecalhos HTTP de seguranca, sitemap, robots e monitor de producao a cada 6 horas adicionados.
 - `.env.local.example`, README e fixtures de teste Perfect Pay atualizados.
 
 ## O que ainda falta para SaaS vendavel
 
 As migrations, a Edge Function, o dominio, o SSL, o deploy automatico e as variaveis publicas do Supabase ja estao ativos em producao. Os dois checkouts recorrentes foram validados e publicados na Hostinger.
 
-1. Configurar SMTP do Supabase e aplicar o template `supabase/templates/invite.html`.
-2. Executar a homologacao de compra, duplicidade, revogacao, convite e renovacao.
-3. Completar os documentos legais com razao social ou nome do responsavel, CPF/CNPJ, endereco e politica comercial de reembolso.
-4. Implementar uma rotina operacional de exportacao e exclusao de dados.
-5. Configurar monitoramento, backups Supabase e alertas de webhook.
+1. Criar `suporte@lucrodacarne.com.br`, configurar SMTP do Supabase e aplicar o template `supabase/templates/invite.html`.
+2. Executar uma compra real mensal e uma anual, validar o convite/liberacao e depois testar cancelamento ou reembolso.
+3. Completar os documentos legais com razao social ou nome do responsavel, CPF/CNPJ e endereco.
+4. Ativar a protecao contra senhas vazadas no Supabase Auth com uma conta administrativa do projeto.
+5. Migrar o Supabase do plano Free para Pro antes de operar vendas para ter backups diarios restauraveis e suporte de producao.
 
 ## Variaveis de producao
 
@@ -73,5 +79,6 @@ Eventos/status a testar:
 npm run lint
 npm run typecheck
 npm run test:perfectpay
+npm run test:launch
 npm run build
 ```

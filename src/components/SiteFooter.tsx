@@ -25,6 +25,12 @@ export default function SiteFooter() {
           >
             Privacidade
           </Link>
+          <Link
+            href="/cancelamento-e-reembolso"
+            className="font-medium text-[#4A0F14] hover:text-[#7A1E24]"
+          >
+            Cancelamento
+          </Link>
           <a
             href="mailto:suporte@lucrodacarne.com.br"
             className="inline-flex items-center gap-1.5 font-medium text-[#4A0F14] hover:text-[#7A1E24]"

@@ -14,12 +14,14 @@ import AlertBox from "@/components/AlertBox";
 import AuthModal from "@/components/AuthModal";
 import Header from "@/components/Header";
 import { useAuth } from "@/hooks/useAuth";
-import { APP_PLANS, getPlanLabel } from "@/lib/plans";
+import { APP_PLANS, getPlanLabel, hasSubscriptionAccess } from "@/lib/plans";
 
 export default function PlanosPage() {
   const { configured, user, subscription } = useAuth();
   const [authOpen, setAuthOpen] = useState(false);
   const activePlan = subscription?.plan ?? "gratis";
+  const hasAccess = hasSubscriptionAccess(subscription);
+  const trialExpired = Boolean(user && subscription?.plan === "gratis" && !hasAccess);
   const paidCheckoutConfigured = APP_PLANS.some((plan) => plan.id !== "gratis" && plan.checkoutUrl);
 
   return (
@@ -32,11 +34,11 @@ export default function PlanosPage() {
               Planos
             </p>
             <h1 className="mt-2 text-2xl sm:text-3xl font-bold text-[#4A0F14]">
-              Transforme os calculos em rotina de margem.
+              Escolha como manter sua margem sob controle.
             </h1>
             <p className="mt-2 max-w-2xl text-sm sm:text-base text-[#8A8178]">
-              O produto ja roda em modo local. Com conta ativa, seus lotes ficam na nuvem,
-              respeitam limite de plano e podem ser liberados automaticamente por compras Perfect Pay.
+              Teste todos os recursos por 3 dias. Depois, continue com uso ilimitado no plano mensal
+              ou economize no plano anual.
             </p>
           </div>
 
@@ -47,7 +49,9 @@ export default function PlanosPage() {
               </div>
               <div>
                 <p className="text-xs font-semibold uppercase text-[#8A8178]">Plano atual</p>
-                <p className="text-lg font-bold text-[#4A0F14]">{getPlanLabel(activePlan)}</p>
+                <p className="text-lg font-bold text-[#4A0F14]">
+                  {user ? (hasAccess ? getPlanLabel(activePlan) : "Acesso encerrado") : "Sem conta"}
+                </p>
               </div>
             </div>
           </div>
@@ -57,7 +61,7 @@ export default function PlanosPage() {
           <div className="mb-6">
             <AlertBox
               type="warning"
-              message="Configure o Supabase para habilitar contas, assinatura e persistencia em nuvem."
+              message="Contas e assinaturas estao temporariamente indisponiveis. Tente novamente em instantes."
             />
           </div>
         )}
@@ -66,14 +70,14 @@ export default function PlanosPage() {
           <div className="mb-6">
             <AlertBox
               type="info"
-              message="Configure os links NEXT_PUBLIC_PERFECTPAY_MONTHLY_CHECKOUT_URL e NEXT_PUBLIC_PERFECTPAY_ANNUAL_CHECKOUT_URL para ativar os botoes de assinatura."
+              message="As novas assinaturas estao temporariamente indisponiveis. Fale com o suporte se precisar de ajuda."
             />
           </div>
         )}
 
         <div className="grid gap-5 lg:grid-cols-3">
           {APP_PLANS.map((plan) => {
-            const current = activePlan === plan.id;
+            const current = Boolean(user && hasAccess && activePlan === plan.id);
             const paidPlan = plan.id !== "gratis";
 
             return (
@@ -118,6 +122,11 @@ export default function PlanosPage() {
                       <ShieldCheck className="h-4 w-4" />
                       Plano atual
                     </button>
+                  ) : paidPlan && !user ? (
+                    <button onClick={() => setAuthOpen(true)} className="btn-primary w-full justify-center">
+                      <User className="h-4 w-4" />
+                      Entrar para assinar
+                    </button>
                   ) : paidPlan && plan.checkoutUrl ? (
                     <a
                       href={plan.checkoutUrl}
@@ -133,6 +142,11 @@ export default function PlanosPage() {
                     <button className="btn-secondary w-full justify-center opacity-70" disabled>
                       <LockKeyhole className="h-4 w-4" />
                       Checkout pendente
+                    </button>
+                  ) : plan.id === "gratis" && trialExpired ? (
+                    <button className="btn-secondary w-full justify-center opacity-70" disabled>
+                      <LockKeyhole className="h-4 w-4" />
+                      Periodo encerrado
                     </button>
                   ) : configured && !user ? (
                     <button onClick={() => setAuthOpen(true)} className="btn-primary w-full justify-center">
@@ -152,18 +166,21 @@ export default function PlanosPage() {
 
         <section className="mt-8 grid gap-5 lg:grid-cols-2">
           <div className="card p-5 sm:p-6">
-            <h2 className="text-lg font-bold text-[#4A0F14]">Como a liberacao funciona</h2>
+            <h2 className="text-lg font-bold text-[#4A0F14]">Acesso liberado automaticamente</h2>
             <p className="mt-2 text-sm text-[#8A8178]">
-              A Perfect Pay envia o webhook para a Edge Function, os codigos de produto e plano
-              sao validados e a assinatura e aplicada pelo e-mail do comprador.
+              Entre na sua conta antes de assinar e use o mesmo e-mail no pagamento. A liberacao ocorre
+              depois da confirmacao da compra pela Perfect Pay.
             </p>
           </div>
           <div className="card p-5 sm:p-6">
-            <h2 className="text-lg font-bold text-[#4A0F14]">Antes de vender</h2>
+            <h2 className="text-lg font-bold text-[#4A0F14]">Compra segura e suporte</h2>
             <p className="mt-2 text-sm text-[#8A8178]">
-              Publique o app, configure Site URL no Supabase, cadastre os codigos Perfect Pay nas
-              secrets da Edge Function e teste uma compra aprovada em ambiente controlado.
+              O pagamento e processado no ambiente seguro da Perfect Pay. Consulte a politica de
+              cancelamento e reembolso ou fale com o suporte sempre que precisar.
             </p>
+            <Link href="/cancelamento-e-reembolso" className="mt-3 inline-flex text-sm font-semibold text-[#7A1E24] hover:underline">
+              Ver cancelamento e reembolso
+            </Link>
           </div>
         </section>
       </main>

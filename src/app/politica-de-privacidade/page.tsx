@@ -93,9 +93,10 @@ export default function PoliticaDePrivacidadePage() {
       <section id="armazenamento-local">
         <h2>6. Armazenamento no navegador</h2>
         <p>
-          Sem login, lotes e preferências podem permanecer somente no armazenamento local do navegador.
-          Com login, a sessão de autenticação utiliza armazenamento técnico essencial e os lotes podem ser
-          enviados ao Supabase. Não utilizamos cookies de publicidade comportamental no aplicativo.
+          A sessão de autenticação utiliza armazenamento técnico essencial no navegador. Contas criadas
+          antes da migração para a nuvem podem possuir lotes legados no armazenamento local; a área da
+          conta oferece uma função para importá-los ao Supabase. Não utilizamos cookies de publicidade
+          comportamental no aplicativo.
         </p>
         <p>
           Dados locais podem ser removidos pelo próprio usuário ao limpar os dados do navegador ou pelas

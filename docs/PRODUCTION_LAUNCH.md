@@ -7,8 +7,10 @@
 - Supabase: projeto `arosnbldkgvbqhwnwfcr`, tabelas com RLS e migrations aplicadas.
 - Webhook: `perfectpay-webhook` publicado sem JWT porque valida token proprio.
 - Gratuito: uso ilimitado por 3 dias desde o cadastro, validado no banco.
-- Pro: R$ 49,90 por mes, uso ilimitado enquanto vigente.
-- Business: R$ 149,90 por ano, uso ilimitado enquanto vigente.
+- Mensal: R$ 49,90 por mes, uso ilimitado enquanto vigente.
+- Anual: R$ 149,90 por ano, uso ilimitado enquanto vigente.
+- Autoexclusao: `account-self-service` ativa, autenticada por JWT e bloqueada para assinatura paga vigente.
+- Monitor: GitHub Actions verifica o dominio, paginas legais, cabecalhos e protecao da funcao a cada 6 horas.
 
 ## Perfect Pay
 
@@ -76,6 +78,7 @@ Depois de aplicar cada variavel, aguarde a reimplantacao automatica e confirme o
 ## Antes da primeira venda
 
 - Fazer uma compra real de baixo valor em cada plano e depois estornar.
-- Revisar Termos de Uso e Privacidade com os dados juridicos do controlador e definir a politica comercial de reembolso.
+- Revisar Termos de Uso, Privacidade e Cancelamento com os dados juridicos do controlador.
 - Criar `suporte@lucrodacarne.com.br` e validar recebimento.
-- Ativar backups, alertas de webhook e monitoramento de erros.
+- Migrar o projeto Supabase do plano Free para Pro para disponibilizar backups diarios restauraveis.
+- Ativar a protecao contra senhas vazadas com uma conta administrativa do projeto.

@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test:perfectpay": "node scripts/validate-perfectpay-webhook.mjs"
+    "test:perfectpay": "node scripts/validate-perfectpay-webhook.mjs",
+    "test:launch": "node scripts/validate-launch-readiness.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.0",
@@ -31,5 +32,8 @@
     "eslint-config-next": "16.2.10",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "overrides": {
+    "postcss": "8.5.16"
   }
 }

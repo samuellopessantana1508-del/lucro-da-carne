@@ -34,6 +34,7 @@ type AuthContextValue = {
   refreshAccount: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (input: SignUpInput) => Promise<{ needsEmailConfirmation: boolean }>;
+  resetPassword: (email: string) => Promise<void>;
   signOut: () => Promise<void>;
 };
 
@@ -178,6 +179,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSubscription(null);
   }, [supabase]);
 
+  const resetPassword = useCallback(
+    async (email: string) => {
+      if (!supabase) throw new Error("Configure o Supabase para redefinir a senha.");
+
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/definir-senha`,
+      });
+      if (error) throw error;
+    },
+    [supabase]
+  );
+
   const value = useMemo<AuthContextValue>(
     () => ({
       configured,
@@ -190,6 +203,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       refreshAccount,
       signIn,
       signUp,
+      resetPassword,
       signOut,
     }),
     [
@@ -198,6 +212,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading,
       profile,
       refreshAccount,
+      resetPassword,
       session,
       signIn,
       signOut,

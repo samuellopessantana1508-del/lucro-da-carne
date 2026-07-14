@@ -3,3 +3,6 @@ verify_jwt = false
 
 [functions.perfectpay-webhook]
 verify_jwt = false
+
+[functions.account-self-service]
+verify_jwt = true
