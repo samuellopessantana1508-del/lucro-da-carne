@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
@@ -28,6 +28,15 @@ const checks = [
     "password recovery is available",
     read("src/components/AuthModal.tsx").includes('mode === "forgot"') &&
       read("src/hooks/useAuth.tsx").includes("resetPasswordForEmail"),
+  ],
+  [
+    "confirmation email uses the hosted brand image",
+    read("supabase/templates/confirmation.html").includes(
+      "https://lucrodacarne.com.br/brand/lucro-da-carne-email.jpg"
+    ) &&
+      !read("supabase/templates/confirmation.html").toLowerCase().includes("gemini") &&
+      existsSync(path.join(root, "public/brand/lucro-da-carne-email.jpg")) &&
+      statSync(path.join(root, "public/brand/lucro-da-carne-email.jpg")).size < 100_000,
   ],
   [
     "account data export is available",
