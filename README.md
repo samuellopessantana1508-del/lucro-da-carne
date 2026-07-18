@@ -184,7 +184,10 @@ No plano Supabase Free, execute o backup externo seguindo [`docs/FREE_PLAN_BACKU
 
 ```powershell
 .\scripts\backup-supabase.cmd
+.\scripts\verify-supabase-backup.cmd -ArchivePath .\.backups\supabase-backup-AAAAMMDD-HHMMSS.zip
 ```
+
+O calendario de vendas, indicadores, suporte e continuidade esta em [`docs/STRATEGIC_OPERATIONS.md`](docs/STRATEGIC_OPERATIONS.md).
 
 ## Estrutura principal
 

@@ -37,13 +37,15 @@
 - Revogacao Perfect Pay reforcada para localizar a assinatura atual mesmo quando uma renovacao substituiu o codigo de venda armazenado.
 - Monitor de producao executado em cada push e a cada 6 horas, com timeouts por requisicao para evitar execucoes presas.
 - Alertas de alteracao de senha e e-mail habilitados no Supabase Auth com mensagens em portugues.
+- Primeiro backup logico executado via Docker e validado por checksum e inventario interno em 18/07/2026.
 
 ## O que ainda falta para SaaS vendavel
 
 As migrations, a Edge Function, o dominio, o SSL, o deploy automatico, o SMTP proprio e as variaveis publicas do Supabase ja estao ativos em producao. Os dois checkouts recorrentes foram validados e publicados na Hostinger.
 
 1. Executar uma compra real mensal e uma anual, validar o convite/liberacao e depois testar cancelamento ou reembolso.
-2. Instalar o Docker Desktop, executar o primeiro backup com `scripts/backup-supabase.cmd` e guardar a copia fora deste computador.
+2. Guardar o backup verificado em armazenamento externo criptografado.
+3. Ensaiar uma restauracao em outro projeto Supabase antes de aumentar o investimento em vendas.
 
 O Supabase permanece no plano Free por decisao do proprietario. A protecao contra senhas vazadas e o download dos backups gerenciados nao estao disponiveis nesse plano; senha minima de 8 caracteres e backup logico externo sao as medidas compensatorias adotadas.
 

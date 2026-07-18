@@ -88,6 +88,7 @@ Depois de aplicar cada variavel, aguarde a reimplantacao automatica e confirme o
 
 ## Antes da primeira venda
 
-- Fazer uma compra real de baixo valor em cada plano e depois estornar.
-- Executar o primeiro backup externo depois de obter a senha do banco e instalar o Docker Desktop.
-- Guardar a connection string e os backups fora do repositorio.
+- [ ] Fazer uma compra real de baixo valor em cada plano e depois estornar.
+- [x] Instalar o Docker Desktop e executar o primeiro backup logico verificado em 18/07/2026.
+- [ ] Copiar o ZIP e o `.sha256` para armazenamento externo criptografado.
+- [ ] Fazer um ensaio de restauracao em outro projeto Supabase antes de investir em aquisicao em escala.
