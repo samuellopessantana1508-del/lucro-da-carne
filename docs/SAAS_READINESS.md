@@ -34,6 +34,9 @@
 - Caixa `suporte@lucrodacarne.com.br`, SMTP proprio e templates de Auth ativados e validados de ponta a ponta.
 - Rotina de backup logico externo adicionada para a operacao deliberada no Supabase Free.
 - Termos, Privacidade e Cancelamento identificam o fornecedor e controlador pelo nome empresarial, CNPJ e endereco completos.
+- Revogacao Perfect Pay reforcada para localizar a assinatura atual mesmo quando uma renovacao substituiu o codigo de venda armazenado.
+- Monitor de producao executado em cada push e a cada 6 horas, com timeouts por requisicao para evitar execucoes presas.
+- Alertas de alteracao de senha e e-mail habilitados no Supabase Auth com mensagens em portugues.
 
 ## O que ainda falta para SaaS vendavel
 

@@ -2,6 +2,9 @@ name: Production smoke check
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
   schedule:
     - cron: "17 */6 * * *"
 
@@ -18,14 +21,18 @@ jobs:
         run: |
           set -euo pipefail
           for path in / /planos /termos-de-uso /politica-de-privacidade /cancelamento-e-reembolso /robots.txt /sitemap.xml; do
-            curl --fail --silent --show-error --location --retry 2 "https://lucrodacarne.com.br${path}" > /dev/null
+            curl --fail --silent --show-error --location \
+              --connect-timeout 5 --max-time 15 --retry 1 --retry-connrefused \
+              --retry-delay 2 --retry-max-time 25 \
+              "https://lucrodacarne.com.br${path}" > /dev/null
           done
 
       - name: Check security headers
         shell: bash
         run: |
           set -euo pipefail
-          headers="$(curl --fail --silent --show-error --head --location https://lucrodacarne.com.br/)"
+          headers="$(curl --fail --silent --show-error --head --location \
+            --connect-timeout 5 --max-time 15 https://lucrodacarne.com.br/)"
           grep -qi '^strict-transport-security:' <<< "$headers"
           grep -qi '^x-content-type-options: nosniff' <<< "$headers"
           grep -qi '^x-frame-options: DENY' <<< "$headers"
@@ -39,5 +46,6 @@ jobs:
         run: |
           set -euo pipefail
           status="$(curl --silent --output /dev/null --write-out '%{http_code}' --request DELETE \
+            --connect-timeout 5 --max-time 15 \
             https://arosnbldkgvbqhwnwfcr.supabase.co/functions/v1/account-self-service)"
           test "$status" = "401"

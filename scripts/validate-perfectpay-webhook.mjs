@@ -150,56 +150,62 @@ recordScenario(
 recordScenario("12 refund revokes access", payloads.get("refunded.json").sale_status_enum === 7);
 recordScenario("13 chargeback revokes access", payloads.get("charged-back.json").sale_status_enum === 9);
 recordScenario(
-  "14 completed event does not duplicate access",
+  "14 cancellation after renewal resolves the original grant",
+  edgeFunctionSource.includes('return fail("grant_lookup_failed", 500)') &&
+    edgeFunctionSource.includes('.eq("provider_sale_id", saleCode)') &&
+    edgeFunctionSource.includes('.eq("user_id", revokedUserId)')
+);
+recordScenario(
+  "15 completed event does not duplicate access",
   payloads.get("completed-after-approved.json").sale_status_enum === 10 &&
     edgeFunctionSource.includes('access: "unchanged"')
 );
 recordScenario(
-  "15 renewal period is deterministic",
+  "16 renewal period is deterministic",
   edgeFunctionSource.includes("const periodEnd = addMonths(approvedAt, plan.periodMonths)") &&
     edgeFunctionSource.includes('sale_code: saleCode')
 );
 recordScenario(
-  "16 invite failure is recorded",
+  "17 invite failure is recorded",
   edgeFunctionSource.includes('return fail("invite_failed", 500)')
 );
 recordScenario(
-  "17 database failure is recorded",
+  "18 database failure is recorded",
   edgeFunctionSource.includes('return fail("profile_create_failed", 500)') &&
     edgeFunctionSource.includes('return fail("subscription_update_failed", 500)')
 );
 recordScenario(
-  "18 concurrent duplicate is constrained",
+  "19 concurrent duplicate is constrained",
   billingMigration.includes("provider_event_id") &&
     schemaMigration.includes("UNIQUE (provider, provider_event_id)")
 );
 recordScenario(
-  "19 free trial expires after three days",
+  "20 free trial expires after three days",
   freeTrialMigration.includes("trial_started_at + interval '3 days'") &&
     freeTrialMigration.includes("s.expires_at IS NOT NULL AND s.expires_at > now()") &&
     freeTrialMigration.includes("subscription_access_expired")
 );
 recordScenario(
-  "20 legacy free-use trigger is removed",
+  "21 legacy free-use trigger is removed",
   legacyFreeLimitCleanupMigration.includes("DROP TRIGGER IF EXISTS enforce_free_plan_limit_trigger") &&
     legacyFreeLimitCleanupMigration.includes("DROP FUNCTION IF EXISTS public.enforce_free_plan_limit") &&
     legacyFreeLimitCleanupMigration.includes("lots_limit = 9999")
 );
 recordScenario(
-  "21 frontend cannot alter subscription",
+  "22 frontend cannot alter subscription",
   schemaMigration.includes("subscriptions_select_own") &&
     !schemaMigration.includes("subscriptions_update_own")
 );
 recordScenario(
-  "22 billing audit redacts token and document",
+  "23 billing audit redacts token and document",
   edgeFunctionSource.includes("payload: auditPayload(payload)") &&
     auditPayloadSource.includes("function auditPayload") &&
     !auditPayloadSource.includes("identification_number") &&
     !auditPayloadSource.includes("token")
 );
 
-if (scenarios.length !== 22) {
-  console.error(`Expected 22 integration scenarios, found ${scenarios.length}`);
+if (scenarios.length !== 23) {
+  console.error(`Expected 23 integration scenarios, found ${scenarios.length}`);
   failures += 1;
 }
 

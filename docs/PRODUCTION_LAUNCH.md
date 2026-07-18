@@ -10,7 +10,7 @@
 - Mensal: R$ 49,90 por mes, uso ilimitado enquanto vigente.
 - Anual: R$ 149,90 por ano, uso ilimitado enquanto vigente.
 - Autoexclusao: `account-self-service` ativa, autenticada por JWT e bloqueada para assinatura paga vigente.
-- Monitor: GitHub Actions verifica o dominio, paginas legais, cabecalhos e protecao da funcao a cada 6 horas.
+- Monitor: GitHub Actions verifica o dominio, paginas legais, cabecalhos e protecao da funcao a cada push no `main` e a cada 6 horas, com limites de tempo por requisicao.
 - Documentos legais: fornecedor e controlador identificados como `60.144.937 SAMUEL LOPES SANTANA`, CNPJ `60.144.937/0001-62`.
 
 ## Perfect Pay
@@ -63,6 +63,7 @@ Depois de aplicar cada variavel, aguarde a reimplantacao automatica e confirme o
 5. Envio do Supabase Auth validado de ponta a ponta em 14/07/2026.
 6. Senha minima do Auth configurada em 8 caracteres.
 7. A protecao contra senhas vazadas nao esta disponivel no plano Free e permanece desativada por limitacao do plano.
+8. Alertas de alteracao de senha e e-mail estao ativos com mensagens em portugues.
 
 ## Continuidade no plano Free
 
@@ -78,6 +79,7 @@ Depois de aplicar cada variavel, aguarde a reimplantacao automatica e confirme o
 - Reenvio do mesmo webhook retorna duplicado sem estender periodo.
 - Status autorizado ou pendente nao libera acesso.
 - Cancelamento, reembolso e chargeback encerram o acesso sem apagar lotes.
+- Revogacoes de vendas anteriores continuam localizando a assinatura atual depois de uma renovacao.
 - Evento completo nao duplica acesso.
 - Convite leva para `/definir-senha`.
 - Acesso gratuito e bloqueado pelo banco apos 3 dias.

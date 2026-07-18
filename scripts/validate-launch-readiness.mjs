@@ -61,6 +61,12 @@ const checks = [
       read("next.config.ts").includes("X-Content-Type-Options"),
   ],
   [
+    "production monitor runs on deploy and cannot hang indefinitely",
+    read(".github/workflows/production-smoke.yml").includes("push:") &&
+      read(".github/workflows/production-smoke.yml").includes("--connect-timeout") &&
+      read(".github/workflows/production-smoke.yml").includes("--max-time"),
+  ],
+  [
     "cancellation policy is linked globally",
     read("src/components/SiteFooter.tsx").includes("/cancelamento-e-reembolso") &&
       read("src/app/cancelamento-e-reembolso/page.tsx").includes("R$ 149,90"),

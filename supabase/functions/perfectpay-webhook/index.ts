@@ -386,6 +386,44 @@ Deno.serve(async (request) => {
       revokedUserId = secondRevoke.data?.user_id ?? null;
     }
 
+    // Renewals can replace the sale code stored on the subscription. Resolve
+    // the original grant so a later cancellation, refund, or chargeback still
+    // reaches the customer's current Perfect Pay subscription.
+    if (!revokedUserId) {
+      const { data: originalGrant, error: grantLookupError } = await supabase
+        .from("billing_access_grants")
+        .select("user_id")
+        .eq("provider", "perfectpay")
+        .eq("provider_sale_id", saleCode)
+        .maybeSingle();
+      if (grantLookupError) return fail("grant_lookup_failed", 500);
+      revokedUserId = originalGrant?.user_id ?? null;
+    }
+
+    if (!revokedUserId) {
+      const customerEmail = normalizeEmail(payload.customer?.email);
+      if (customerEmail) {
+        const { data: revokeProfile, error: revokeProfileError } = await supabase
+          .from("profiles")
+          .select("id")
+          .ilike("email", customerEmail)
+          .maybeSingle();
+        if (revokeProfileError) return fail("revoke_profile_lookup_failed", 500);
+        revokedUserId = revokeProfile?.id ?? null;
+      }
+    }
+
+    if (revokedUserId) {
+      const fallbackRevoke = await supabase
+        .from("subscriptions")
+        .update(revokePayload)
+        .eq("provider", "perfectpay")
+        .eq("user_id", revokedUserId)
+        .select("user_id")
+        .maybeSingle();
+      if (fallbackRevoke.error) return fail("subscription_revoke_failed", 500);
+    }
+
     const { error: grantError } = await supabase
       .from("billing_access_grants")
       .update({ status: "revoked", revoked_at: now })
