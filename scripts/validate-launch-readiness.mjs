@@ -38,6 +38,20 @@ const checks = [
     read("supabase/functions/account-self-service/index.ts").includes("auth.getUser(token)"),
   ],
   [
+    "manual paid grants clear expired trial access",
+    read("src/app/admin/page.tsx").includes("shouldResetAccessWindow") &&
+      read("src/app/admin/page.tsx").includes("updatePayload.billing_cycle") &&
+      read("src/app/admin/page.tsx").includes("updatePayload.expires_at = null") &&
+      read("supabase/migrations/20260718155408_fix_manual_subscription_access.sql").includes(
+        "provider = 'manual'"
+      ),
+  ],
+  [
+    "customer subscription refreshes after an admin update",
+    read("src/hooks/useAuth.tsx").includes('"postgres_changes"') &&
+      read("src/hooks/useAuth.tsx").includes('table: "subscriptions"'),
+  ],
+  [
     "active paid subscriptions block account deletion",
     read("supabase/functions/account-self-service/index.ts").includes("active_subscription_must_be_cancelled"),
   ],

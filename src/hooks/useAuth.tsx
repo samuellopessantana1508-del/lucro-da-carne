@@ -125,6 +125,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [loadAccount, supabase]);
 
+  useEffect(() => {
+    if (!supabase || !user?.id) return;
+
+    const client = supabase;
+    const userId = user.id;
+    const refreshSubscription = () => {
+      void loadAccount(userId).catch((error) => {
+        setAccountError(error instanceof Error ? error.message : "Falha ao atualizar a assinatura.");
+      });
+    };
+    const channel = client
+      .channel(`subscription-${userId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "subscriptions",
+          filter: `user_id=eq.${userId}`,
+        },
+        refreshSubscription
+      )
+      .subscribe();
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === "visible") refreshSubscription();
+    };
+
+    window.addEventListener("focus", refreshSubscription);
+    document.addEventListener("visibilitychange", refreshWhenVisible);
+
+    return () => {
+      window.removeEventListener("focus", refreshSubscription);
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
+      void client.removeChannel(channel);
+    };
+  }, [loadAccount, supabase, user?.id]);
+
   const signIn = useCallback(
     async (email: string, password: string) => {
       if (!supabase) throw new Error("Configure o Supabase para entrar.");

@@ -9,7 +9,7 @@ import MetricCard from "@/components/MetricCard";
 import { useAuth } from "@/hooks/useAuth";
 import type { Database, SubscriptionPlan, SubscriptionStatus } from "@/lib/database.types";
 import { formatDateBR } from "@/lib/format";
-import { PLAN_DEFAULT_LIMITS } from "@/lib/plans";
+import { hasSubscriptionAccess, PLAN_DEFAULT_LIMITS } from "@/lib/plans";
 import { getSupabaseBrowserClient } from "@/lib/supabase";
 
 type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
@@ -164,14 +164,50 @@ export default function AdminPage() {
     setMessage(null);
 
     try {
-      const { error: updateError } = await supabase
+      const changedAt = new Date();
+      const paidAccessRequested = plan !== "gratis" && status === "active";
+      const existingExpiry = customer.subscription.expires_at
+        ? new Date(customer.subscription.expires_at).getTime()
+        : null;
+      const shouldResetAccessWindow = paidAccessRequested && (
+        customer.subscription.provider === "manual" ||
+        customer.subscription.plan === "gratis" ||
+        customer.subscription.status !== "active" ||
+        existingExpiry === null ||
+        !Number.isFinite(existingExpiry) ||
+        existingExpiry <= changedAt.getTime()
+      );
+      const updatePayload: Database["public"]["Tables"]["subscriptions"]["Update"] = {
+        plan,
+        status,
+        lots_limit: lotsLimit,
+      };
+
+      if (shouldResetAccessWindow) {
+        updatePayload.billing_cycle = plan === "business" ? "annual" : "monthly";
+        updatePayload.current_period_start = changedAt.toISOString();
+        updatePayload.current_period_end = null;
+        updatePayload.expires_at = null;
+        updatePayload.cancel_at_period_end = false;
+      }
+
+      const { data: updatedSubscription, error: updateError } = await supabase
         .from("subscriptions")
-        .update({ plan, status, lots_limit: lotsLimit })
-        .eq("id", customer.subscription.id);
+        .update(updatePayload)
+        .eq("id", customer.subscription.id)
+        .select("*")
+        .single();
 
       if (updateError) throw updateError;
+      if (paidAccessRequested && !hasSubscriptionAccess(updatedSubscription)) {
+        throw new Error("A assinatura foi salva, mas a validade ainda bloqueia o acesso.");
+      }
 
-      setMessage(`Assinatura de ${customer.email} atualizada.`);
+      setMessage(
+        paidAccessRequested
+          ? `Assinatura de ${customer.email} atualizada e acesso liberado.`
+          : `Assinatura de ${customer.email} atualizada.`
+      );
       await loadCustomers();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Nao foi possivel atualizar a assinatura.");
