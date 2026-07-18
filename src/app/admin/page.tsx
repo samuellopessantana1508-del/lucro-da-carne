@@ -107,8 +107,12 @@ export default function AdminPage() {
   const metrics = useMemo(
     () => ({
       customers: customers.length,
-      paid: customers.filter((customer) => customer.subscription?.plan !== "gratis").length,
-      active: customers.filter((customer) => customer.subscription?.status === "active").length,
+      paid: customers.filter(
+        (customer) =>
+          customer.subscription?.plan !== "gratis" &&
+          hasSubscriptionAccess(customer.subscription)
+      ).length,
+      active: customers.filter((customer) => hasSubscriptionAccess(customer.subscription)).length,
       lots: customers.reduce((total, customer) => total + customer.lotsCount, 0),
     }),
     [customers]

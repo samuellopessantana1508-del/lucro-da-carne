@@ -47,6 +47,12 @@ const checks = [
       ),
   ],
   [
+    "admin metrics exclude expired access",
+    read("src/app/admin/page.tsx").includes(
+      "active: customers.filter((customer) => hasSubscriptionAccess(customer.subscription)).length"
+    ),
+  ],
+  [
     "customer subscription refreshes after an admin update",
     read("src/hooks/useAuth.tsx").includes('"postgres_changes"') &&
       read("src/hooks/useAuth.tsx").includes('table: "subscriptions"'),
