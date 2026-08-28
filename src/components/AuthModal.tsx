@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { X, KeyRound, LogIn, UserPlus } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { trackSignUp } from "@/lib/tracking";
 
 type AuthModalProps = {
   open: boolean;
@@ -57,6 +58,8 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
         name: name.trim(),
         businessName: businessName.trim(),
       });
+
+      trackSignUp();
 
       if (result.needsEmailConfirmation) {
         setMessage("Cadastro criado. Confira seu e-mail para confirmar o acesso.");

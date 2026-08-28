@@ -27,6 +27,7 @@ import {
   User,
   WifiOff,
 } from "lucide-react";
+import { trackPurchase } from "@/lib/tracking";
 
 export default function ContaPage() {
   const {
@@ -52,6 +53,24 @@ export default function ContaPage() {
   useEffect(() => {
     if (!loaded || loadedFor !== userId) void loadLots(userId);
   }, [loaded, loadedFor, loadLots, userId]);
+
+  useEffect(() => {
+    if (
+      subscription &&
+      subscription.plan !== "gratis" &&
+      subscription.status === "active" &&
+      subscription.approved_at
+    ) {
+      const approvedMs = new Date(subscription.approved_at).getTime();
+      const fiveMinAgo = Date.now() - 5 * 60 * 1000;
+      const key = `purchase_tracked_${subscription.id}`;
+      if (approvedMs > fiveMinAgo && !sessionStorage.getItem(key)) {
+        const value = subscription.plan === "pro" ? 49.9 : 149.9;
+        trackPurchase(subscription.plan, value, subscription.id);
+        sessionStorage.setItem(key, "1");
+      }
+    }
+  }, [subscription]);
 
   const usageLabel = subscription?.plan === "gratis"
     ? `${FREE_TRIAL_DAYS} dias gratis`
