@@ -15,7 +15,6 @@ import AuthModal from "@/components/AuthModal";
 import Header from "@/components/Header";
 import { useAuth } from "@/hooks/useAuth";
 import { APP_PLANS, getPlanLabel, hasSubscriptionAccess } from "@/lib/plans";
-import { trackInitiateCheckout } from "@/lib/tracking";
 
 export default function PlanosPage() {
   const { configured, user, subscription } = useAuth();
@@ -134,10 +133,6 @@ export default function PlanosPage() {
                       target="_blank"
                       rel="noreferrer"
                       className="btn-primary w-full justify-center"
-                      onClick={() => {
-                        const value = plan.id === "pro" ? 49.9 : 149.9;
-                        trackInitiateCheckout(plan.name, value);
-                      }}
                     >
                       <CreditCard className="h-4 w-4" />
                       Assinar agora
